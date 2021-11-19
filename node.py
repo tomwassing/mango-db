@@ -6,6 +6,14 @@ import time
 import json
 import random
 
+
+'''
+TODO: 
+    - Shutdown correctly using Ctrl+C
+    - READ operation
+    - Ordering of messages
+'''
+
 class Node:
     def __init__(self, port, node_ports):
         self.port = port
@@ -51,7 +59,6 @@ class Node:
 
     def send(self, socket, message):
         socket.send_string(json.dumps(message))
-        pass
 
     def on_message(self, port, socket, data):
         pass
@@ -97,7 +104,6 @@ class Client:
         logging.info(f"Client: send message: {data}")
         result = socket.recv_string()
         logging.info(f"Client: received message: {result}")
-        
 
 
 class Follower(Node):
@@ -135,12 +141,14 @@ class Follower(Node):
         if data["type"] == "client_write":
             logging.debug(f"Follower:{self.port}: received client_write message: {data} from client")
             self.write(data["key"], data["value"], socket)
-        if data["type"] == "write":
+
+        elif data["type"] == "write":
             # Handling incoming write message from other nodes. Ack the message and
             # add to own write buffer.
             logging.debug(f"Follower:{self.port}: received write message: {data} from node:{port}")
             self.write_buffer[data["id"]] = (data["key"], data["value"])
             self.handle_acknowledgement(socket, data["id"])
+        
         elif data["type"] == "acknowledge":
             # Receiving ack message from other nodes, finalize if all ack messages
             # have been received
