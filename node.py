@@ -5,7 +5,7 @@ import logging
 import time
 import json
 import random
-
+import signal
 
 '''
 TODO: 
@@ -185,4 +185,5 @@ def main(num_nodes, start_port=5000):
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     main(3)
