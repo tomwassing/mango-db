@@ -24,6 +24,7 @@ def main(num_nodes, start_port=25000):
 
     client = Client(node_ports)
     client.write("Hello", "World")
+    client.read("Hello")
 
 
 if __name__ == '__main__':

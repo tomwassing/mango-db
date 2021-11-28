@@ -8,6 +8,7 @@ class Follower(Node):
         self.ack_buffer = {}
         self.write_buffer = {}
         self.write_id = 0
+        self.data = {"Hello": "World"}
 
     def handle_acknowledgement(self, addr, msg_id):
         data = {
@@ -35,8 +36,28 @@ class Follower(Node):
         
         self.send_to_all(data)
 
+    def is_key_pendings(self, key):
+        for value in self.ack_buffer.values():
+            if value.key == key:
+                return True
+
+        return False
+
     def on_message(self, addr, data):
-        if data["type"] == "client_write":
+        if data["type"] == "client_read":
+            key = data["key"]
+            if self.is_key_pendings(key):
+                pass
+            else:
+                data = {
+                    "type": "read_result",
+                    "key": key,
+                    "value": self.data[key],
+                }
+
+                self.send(addr, data)
+
+        elif data["type"] == "client_write":
             logging.debug(f"Follower:{self.port}: received client_write message: {data} from client")
             self.write(data["key"], data["value"], addr)
 
