@@ -14,7 +14,7 @@ TODO:
 '''
 
 def main(num_nodes, start_port=25000):
-    logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(levelname)-8s: %(message)s',
                         level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
 
     node_ports = list(range(start_port, start_port + num_nodes))

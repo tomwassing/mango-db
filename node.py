@@ -13,13 +13,13 @@ class Node:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(("", port))
 
-        logging.info(f"Node:{port} listining on port {self.port}")
+        logging.info(f"{self} listining on port {self.port}")
 
     def run(self):
         while True:
             data, addr = self.socket.recvfrom(1024)
             message = json.loads(data.decode())
-            logging.debug(f"Node:{self.port}, received message: {message} from {addr}")
+            logging.debug(f"{self}, received message: {message} from {addr}")
             self.on_message(addr, message)
 
     def send_to_all(self, data):
@@ -28,7 +28,13 @@ class Node:
 
     def send(self, addr, message):
         self.socket.sendto(json.dumps(message).encode(), addr)
-        logging.debug(f"Node:{self.port}, sent message: {message} to {addr}")
+        logging.debug(f"{self}, sent message: {message} to {addr}")
 
     def on_message(self, addr, message):
         pass
+
+    def __str__(self) -> str:
+        return f"Node:{self.port}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
