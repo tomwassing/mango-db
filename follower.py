@@ -10,10 +10,10 @@ class Follower(Node):
         self.write_id = 0
         self.data = {"Hello": "World"}
 
-    def handle_acknowledgement(self, addr, msg_id):
+    def handle_acknowledgement(self, addr, data):
         data = {
             "type": "acknowledge",
-            "id": msg_id,
+            "id": data["id"],
             "from": self.port,
         }
 
@@ -66,7 +66,7 @@ class Follower(Node):
             # add to own write buffer.
             logging.debug(f"Follower:{self.port}: received write message: {data} from node:{addr}")
             self.write_buffer[data["id"]] = (data["key"], data["value"])
-            self.handle_acknowledgement(addr, data["id"])
+            self.handle_acknowledgement(addr, data)
         
         elif data["type"] == "acknowledge":
             # Receiving ack message from other nodes, finalize if all ack messages

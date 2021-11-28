@@ -4,6 +4,8 @@ import signal
 import logging
 from threading import Thread
 
+from leader import Leader
+
 '''
 TODO: 
     - Shutdown correctly using Ctrl+C
@@ -16,8 +18,9 @@ def main(num_nodes, start_port=25000):
                         level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
 
     node_ports = list(range(start_port, start_port + num_nodes))
-    nodes = [Follower(port, [p for p in node_ports if p != port]) for port in node_ports]
-    threads = [Thread(target=node.run) for node in nodes]
+    nodes = [Follower(port, [p for p in node_ports if p != port]) for port in node_ports[:-1]]
+    leader = Leader(node_ports[-1], node_ports[:-1])
+    threads = [Thread(target=node.run) for node in [leader, *nodes]]
 
     for thread in threads:
         thread.start()
