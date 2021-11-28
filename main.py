@@ -3,6 +3,14 @@ from follower import Follower
 import signal
 import logging
 from threading import Thread
+
+'''
+TODO: 
+    - Shutdown correctly using Ctrl+C
+    - READ operation
+    - Ordering of messages
+'''
+
 def main(num_nodes, start_port=25000):
     logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s',
                         level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
