@@ -15,7 +15,7 @@ class Client:
         self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
         logging.info(f"Client: send message to node:{port} : {data}")
         data, addr = self.socket.recvfrom(1024)
-        # logging.info(f"Client: received message: {data} from {addr}")
+        logging.info(f"Client: received message: {data} from {addr}")
 
     def write(self, key, value):
         data = {
@@ -25,7 +25,6 @@ class Client:
         }
 
         self.send_recv(data)
-
 
     def read(self, key):
         data = {
