@@ -1,26 +1,28 @@
-
 import logging
 from follower import Follower
 
 
 class Leader(Follower):
-
-    def __init__(self, port, node_ports):
-        super().__init__(port, node_ports)
+    def __init__(self, port, node_ports, leader_port):
+        super().__init__(port, node_ports, leader_port)
         self.index = 0
 
-    def handle_acknowledgement(self, addr, data):
-        super().handle_acknowledgement(addr, data)
-        self.store_data(data["id"], data["key"], data["value"])
-
-    def write(self, key, value, addr):
-        msg_id = super().write(key, value, addr)
+    def send_client_write_ack(self, msg_id):
+        key, value = self.write_buffer[msg_id]
         self.store_data(msg_id, key, value)
 
-        return msg_id
+    def handle_client_write_ack(self, addr, data):
+        key, value = self.write_buffer[data["id"]]
+        self.store_data(data["id"], key, value)
+
+    def on_message(self, addr, data):
+        super().on_message(addr, data)
+        if data["type"] == "client_write_ack":
+            self.handle_client_write_ack(addr, data)
 
     def store_data(self, msg_id, key, value):
         self.data[key] = value
+        del self.write_buffer[msg_id]
 
         logging.info(f"{self}: saved '{key} = {value}'")
 
@@ -31,9 +33,7 @@ class Leader(Follower):
         }
 
         self.index += 1
-
         self.send_to_all(data)
 
     def __str__(self) -> str:
         return f"Leader:{self.port}"
-

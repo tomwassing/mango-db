@@ -7,9 +7,10 @@ import socket
 
 
 class Node:
-    def __init__(self, port, ports):
+    def __init__(self, port, ports, leader_port):
         self.port = port
         self.ports = ports
+        self.leader = leader_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(("", port))
 
@@ -27,8 +28,8 @@ class Node:
             self.send(("127.0.0.1", port), data)
 
     def send(self, addr, message):
-        self.socket.sendto(json.dumps(message).encode(), addr)
         logging.debug(f"{self}, sent message: {message} to {addr}")
+        self.socket.sendto(json.dumps(message).encode(), addr)
 
     def on_message(self, addr, message):
         pass

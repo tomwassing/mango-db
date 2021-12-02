@@ -14,12 +14,12 @@ TODO:
 '''
 
 def main(num_nodes, start_port=25000):
-    logging.basicConfig(format='%(asctime)s - %(levelname)-8s: %(message)s',
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d - %(levelname)-8s: %(message)s',
                         level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
 
     node_ports = list(range(start_port, start_port + num_nodes))
-    nodes = [Follower(port, [p for p in node_ports if p != port]) for port in node_ports[:-1]]
-    leader = Leader(node_ports[-1], node_ports[:-1])
+    nodes = [Follower(port, [p for p in node_ports if p != port], node_ports[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_ports[-1], node_ports[:-1], node_ports[-1])
     threads = [Thread(target=node.run) for node in [leader, *nodes]]
 
     for thread in threads:
@@ -32,4 +32,4 @@ def main(num_nodes, start_port=25000):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    main(4)
+    main(3)
