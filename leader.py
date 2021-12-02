@@ -5,7 +5,6 @@ from follower import Follower
 class Leader(Follower):
     def __init__(self, port, node_ports, leader_port):
         super().__init__(port, node_ports, leader_port)
-        self.index = 0
 
     def send_client_write_ack(self, msg_id):
         key, value = self.write_buffer[msg_id]
@@ -29,11 +28,11 @@ class Leader(Follower):
         data = {
             "type": "write_order",
             "id": msg_id,
-            "index": self.index
+            "index": self.order_index
         }
 
-        self.index += 1
         self.send_to_all(data)
+        self.order_index += 1
 
     def __str__(self) -> str:
         return f"Leader:{self.port}"

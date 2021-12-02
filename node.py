@@ -12,12 +12,14 @@ class Node:
         self.ports = ports
         self.leader = leader_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(("", port))
+        self.is_connected = True
 
         logging.info(f"{self} listining on port {self.port}")
 
     def run(self):
-        while True:
+        while self.is_connected:
             data, addr = self.socket.recvfrom(1024)
             message = json.loads(data.decode())
             logging.debug(f"{self}, received message: {message} from {addr}")

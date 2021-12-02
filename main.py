@@ -26,10 +26,15 @@ def main(num_nodes, start_port=25000):
         thread.start()
 
     client = Client(node_ports)
-    client.write("Hello", "World")
-    client.read("Hello")
+    client.write("World!", 'Hello1?')
+    client.write("World!", 'Hello2?')
+    client.write("World!", 'Hello3?')
+    client.write("World!", 'Hello4?')
+    client.write("World!", 'Hello5?')
+    client.read("World!")
+    client.exit()
 
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    main(2)
+    main(3)
