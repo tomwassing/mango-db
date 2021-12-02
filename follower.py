@@ -1,3 +1,4 @@
+from collections import defaultdict
 from data import PendingElement
 from node import Node
 import logging
@@ -7,6 +8,7 @@ class Follower(Node):
         super().__init__(port, node_ports, leader_port)
         self.ack_buffer = {}
         self.write_buffer = {}
+        self.read_buffer = defaultdict(list)
         self.write_id = 0
         self.data = {"Hello": "World"}
         self.order_index = 0
@@ -31,9 +33,13 @@ class Follower(Node):
         self.send_to_all(data)
         return msg_id
 
-    def is_key_pendings(self, key):
+    def is_key_pending(self, key):
         for value in self.ack_buffer.values():
             if value.key == key:
+                return True
+
+        for value in self.write_buffer.values():
+            if value[0] == key:
                 return True
 
         return False
@@ -53,10 +59,23 @@ class Follower(Node):
             else:
                 break
 
+        for key, clients in self.read_buffer.items():
+            if self.is_key_pending(key):
+                continue
+
+            for client in clients:
+                data = {
+                    "type": "read_result",
+                    "key": key,
+                    "value": self.data[key]
+                }
+
+                self.send(client, data)
+
     def handle_client_read(self, addr, data):
         key = data["key"]
-        if self.is_key_pendings(key):
-            pass
+        if self.is_key_pending(key):
+            self.read_buffer[key].append(addr)
         else:
             data = {
                 "type": "read_result",

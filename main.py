@@ -32,4 +32,4 @@ def main(num_nodes, start_port=25000):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    main(3)
+    main(2)
