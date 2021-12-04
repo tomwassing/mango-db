@@ -24,8 +24,7 @@ class System:
 
     def shutdown_system(self):
         for client in self.clients: client.exit()
-        # kill thread needed?
-        for thread in self.threads: pass
+        for thread in self.threads: thread.join()
 
     def _startup_nodes(self):
         self.leader = Leader(self.ports[-1], self.ports[:-1], self.ports[-1])
