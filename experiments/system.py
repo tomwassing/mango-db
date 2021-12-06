@@ -7,8 +7,8 @@ from threading import Thread
 
 class System:
 
-    def __init__(self, num_nodes, num_clients, port):
-
+    def __init__(self, name, num_nodes, num_clients, port):
+        self.name = name
         self.num_nodes = num_nodes
         self.num_clients = num_clients
         self.ports = list(range(port, port + num_nodes))
@@ -18,11 +18,11 @@ class System:
         self.clients = None
         self.threads = None
 
-    def start_system(self):
+    def start(self):
         self._startup_nodes()
         self._make_clients()
 
-    def shutdown_system(self):
+    def shutdown(self):
         for client in self.clients: client.exit()
         for thread in self.threads: thread.join()
 
