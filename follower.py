@@ -4,7 +4,7 @@ from node import Node
 import logging
 import sys
 class Follower(Node):
-    def __init__(self, port, node_ports, leader_port):
+    def __init__(self, port, node_ports, leader_port, order_on_write=False):
         super().__init__(port, node_ports, leader_port)
         self.ack_buffer = {}
         self.write_buffer = {}
@@ -14,6 +14,7 @@ class Follower(Node):
         self.order_index = 0
         self.order_buffer = []
         self.leader_port = leader_port
+        self.order_on_write = order_on_write
 
     def write(self, key, value, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
@@ -50,13 +51,17 @@ class Follower(Node):
 
         for write_order in list(sorted(self.order_buffer, key=lambda x: x["index"])):
             if write_order["index"] == self.order_index:
-                key, value = self.write_buffer[write_order["id"]]
+                key, value, client_addr = self.write_buffer[write_order["id"]]
                 del self.write_buffer[write_order["id"]]
                 self.order_buffer.remove(write_order)
 
                 logging.debug(f"{self}: saved {key} = {value} of message: {write_order['id']}")
                 self.data[key] = (value, self.order_index)
                 self.order_index += 1
+
+                if self.order_on_write and client_addr:
+                    self.send_write_result(client_addr, key, value)
+
             else:
                 break
 
@@ -95,7 +100,7 @@ class Follower(Node):
     def handle_write(self, addr, data):
         # Handling incoming write message from other nodes. Ack the message and
         # add to own write buffer.
-        self.write_buffer[data["id"]] = (data["key"], data["value"])
+        self.write_buffer[data["id"]] = (data["key"], data["value"], None)
 
         data = {
             "type": "acknowledge",
@@ -122,18 +127,23 @@ class Follower(Node):
         if self.ack_buffer[msg_id].is_complete(len(self.ports)):
             logging.debug(f"{self}: received all acknowledgements for message: {msg_id}")
             pending_element = self.ack_buffer[msg_id]
-            self.write_buffer[msg_id] = (pending_element.key, pending_element.value)
+            self.write_buffer[msg_id] = (pending_element.key, pending_element.value, pending_element.client_addr)
             del self.ack_buffer[msg_id]
 
-            receiver = pending_element.client_addr
-            data = {
-                "type": "write_result",
-                "key": pending_element.key,
-                "value": pending_element.value
-            }
-
-            self.send(receiver, data)
+            if not self.order_on_write:
+                self.send_write_result(pending_element.client_addr,
+                    pending_element.key, pending_element.value)
             self.send_client_write_ack(msg_id)
+
+    def send_write_result(self, client_addr, key, value):
+        print("send_write_result", client_addr, key, value)
+        data = {
+            "type": "write_result",
+            "key": key,
+            "value": value
+        }
+
+        self.send(client_addr, data)
 
     def on_message(self, addr, data):
         if data["type"] == "exit":

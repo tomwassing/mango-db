@@ -1,3 +1,5 @@
+import sys 
+sys.path.append('..')
 from leader import Leader
 from follower import Follower
 from client import Client
