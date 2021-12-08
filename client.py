@@ -36,17 +36,14 @@ class Client:
         if blocking:
             self.send_recv(data, port=port)
         else:
+            if not port:
+                port = random.choice(self.node_ports)
             self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
 
-    def write_recv(self, key, value, port=None):
-        try:
-            data, addr = self.socket.recvfrom(1024)
-            logging.info(f"Client: received message: {data} from {addr}")
-            return json.loads(data.decode())
-        except socket.timeout:
-            # Follower has been disconnected. Resend request to different node.
-            logging.info(f"Client: received timeout from {port}")
-            self.write(key, value, port=random.choice([x for x in self.node_ports if x != port]), blocking=False)
+    def write_recv(self):
+        data, addr = self.socket.recvfrom(1024)
+        logging.info(f"Client: received message: {data} from {addr}")
+        return json.loads(data.decode())
 
     def read(self, key, port=None):
         data = {

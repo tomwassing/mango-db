@@ -20,7 +20,7 @@ class Leader(Follower):
             self.handle_client_write_ack(addr, data)
 
     def store_data(self, msg_id, key, value):
-        self.data[key] = value
+        self.data[key] = (value, self.order_index)
         del self.write_buffer[msg_id]
 
         logging.info(f"{self}: saved '{key} = {value}'")

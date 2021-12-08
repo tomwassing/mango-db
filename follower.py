@@ -10,7 +10,7 @@ class Follower(Node):
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
         self.write_id = 0
-        self.data = {"Hello": "World"}
+        self.data = {}
         self.order_index = 0
         self.order_buffer = []
         self.leader_port = leader_port
@@ -29,7 +29,7 @@ class Follower(Node):
             "value": value,
             "from": self.port,
         }
-        
+
         self.send_to_all(data)
         return msg_id
 
@@ -41,7 +41,6 @@ class Follower(Node):
 
         for value in self.write_buffer.values():
             if value[0] == key:
-                print("write_buffer", self.write_buffer)
                 return True
 
         return False
@@ -56,7 +55,7 @@ class Follower(Node):
                 self.order_buffer.remove(write_order)
 
                 logging.debug(f"{self}: saved {key} = {value} of message: {write_order['id']}")
-                self.data[key] = value
+                self.data[key] = (value, self.order_index)
                 self.order_index += 1
             else:
                 break
@@ -69,7 +68,8 @@ class Follower(Node):
                 data = {
                     "type": "read_result",
                     "key": key,
-                    "value": self.data[key]
+                    "value": self.data[key][0],
+                    "order_index": self.data[key][1]
                 }
 
                 self.send(client, data)
@@ -83,7 +83,8 @@ class Follower(Node):
             data = {
                 "type": "read_result",
                 "key": key,
-                "value": self.data[key],
+                "value": self.data[key][0],
+                "order_index": self.data[key][1]
             }
 
             self.send(addr, data)
@@ -150,6 +151,6 @@ class Follower(Node):
             self.handle_write(addr, data)
         elif data["type"] == "acknowledge":
             self.handle_acknowledge(addr, data)
-    
+
     def __str__(self) -> str:
         return f"Follower:{self.port}"

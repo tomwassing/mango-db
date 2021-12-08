@@ -7,7 +7,7 @@ from threading import Thread
 from leader import Leader
 
 '''
-TODO: 
+TODO:
     - Shutdown correctly using Ctrl+C
     - READ operation
     - Ordering of messages

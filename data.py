@@ -6,7 +6,7 @@ class PendingElement:
         self.msg_id = msg_id
         self.acknowledged = set()
         self.client_addr = client_addr
-    
+
     def acknowledge(self, node_port):
         self.acknowledged.add(node_port)
 
