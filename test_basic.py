@@ -8,8 +8,8 @@ from client import Client
 
 def setup(num_nodes, num_clients, start_port=25000):
     node_ports = list(range(start_port, start_port + num_nodes + num_clients))
-    nodes = [Follower(port, [p for p in node_ports if p != port], node_ports[-1], order_on_write=True) for port in node_ports[:-1]]
-    leader = Leader(node_ports[-1], node_ports[:-1], node_ports[-1], order_on_write=True)
+    nodes = [Follower(port, [p for p in node_ports if p != port], node_ports[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_ports[-1], node_ports[:-1], node_ports[-1])
     processes = [threading.Thread(target=node.run) for node in [leader, *nodes]]
     clients = [Client(node_ports) for _ in range(num_clients)]
 
