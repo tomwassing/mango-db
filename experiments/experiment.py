@@ -35,7 +35,8 @@ class Experiment:
                 system_name = self._current_system.name
                 n_nodes = self._current_system.num_nodes
                 n_clients = self._current_system.num_clients
-                yield [system_name, run_id, latency, operation, on_leader, n_nodes, n_clients]
+                order_on_write = self._current_system.order_on_write
+                yield [system_name, run_id, latency, operation, on_leader, n_nodes, n_clients, order_on_write]
 
             self._current_system.shutdown()
 
