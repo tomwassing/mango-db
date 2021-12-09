@@ -3,6 +3,7 @@ import random
 import socket
 import json
 
+
 class Client:
     def __init__(self, node_ports):
         self.node_ports = node_ports
@@ -20,7 +21,7 @@ class Client:
         logging.info(f"Client: send message to node:{port} : {data}")
         data, addr = self.socket.recvfrom(1024)
         logging.info(f"Client: received message: {data} from {addr}")
-        return json.loads(data.decode())
+        return {**json.loads(data.decode()), 'port': port}
 
     def send_all(self, data):
         for port in self.node_ports:
@@ -34,11 +35,13 @@ class Client:
         }
 
         if blocking:
-            self.send_recv(data, port=port)
+            port = self.send_recv(data, port=port)['port']
         else:
             if not port:
                 port = random.choice(self.node_ports)
             self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
+
+        return port
 
     def write_recv(self):
         data, addr = self.socket.recvfrom(1024)

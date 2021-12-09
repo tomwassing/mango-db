@@ -10,12 +10,11 @@ from system import System
 def experiment_func():
 
     # Alternate the reads and writes
-    print('read/write in alternation')
+    print('read/write in alternation with zipf distribution for keys')
     experiment.reset()
     n_writes = experiment.n_writes
     n_reads = experiment.n_reads
     system_name = experiment._current_system
-    # operations, latencies, on_leader_arr = [], [], []
 
     while n_writes != 0 and n_reads != 0:
         latency, operation, on_leader = None, None, None
@@ -42,8 +41,6 @@ def experiment_func():
 if __name__ == '__main__':
 
     our_system = System(name='ordering_after_write', num_nodes=2, num_clients=1, port=27000)
-
-    # TODO: implement actual benchmark system
     benchmark_system = System(name='ordering_before_write', num_nodes=2, num_clients=1, port=28000, order_on_write=True)
 
     experiment = Experiment(
@@ -56,7 +53,7 @@ if __name__ == '__main__':
 
     # Run experiment 5 times
     results = pd.DataFrame(columns=["system_name", "run_id", "latency", "operation", "on_leader"])
-    # dtypes = [str, int, np.float64, str, bool]
+
     print("{}".format(experiment.__str__()))
 
     for result in experiment.run(experiment_func, repeat=10):

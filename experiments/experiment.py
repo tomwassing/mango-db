@@ -1,6 +1,6 @@
-from uuid import uuid4
 import random
 from time import time
+import numpy as np
 
 
 class Experiment:
@@ -13,13 +13,11 @@ class Experiment:
 
         self.n_reads = n_reads
         self.n_writes = n_writes
-        self.keys = [str(uuid4()) for _ in range(n_reads)]
-        self.p_key_repeat = p_key_repeat
 
-        self._setup()
+        self.p_key_repeat = p_key_repeat
+        self._used_keys = []
 
     def _setup(self):
-        self._unused_keys = self.keys.copy()
         self._used_keys = []
 
     def _reset_after_run(self):
@@ -39,9 +37,6 @@ class Experiment:
                 yield [system_name, run_id, latency, operation, on_leader]
 
             self._current_system.shutdown()
-            self._reset_after_run()
-
-            # yield run_ids, latencies, operations, on_leader
 
     def run(self, experiment_func, repeat=1):
         print("Start experiment")
@@ -59,16 +54,9 @@ class Experiment:
         self._setup()
 
     def _get_key_value_pair(self):
-        repeat_key = random.random() <= self.p_key_repeat # make distribution
-        value = len(self.keys)
-
-        if repeat_key and len(self._used_keys) > 0:
-            key = random.choice(self._used_keys)
-        else:
-            if len(self._unused_keys) == 0:
-                raise Exception('no unused key to write on')
-            key = self._unused_keys.pop()
-            self._used_keys.append(key)
+        value = random.random()
+        key = str(np.random.zipf(1.1))
+        self._used_keys.append(key)
 
         return key, value
 
@@ -87,7 +75,7 @@ class Experiment:
         key = random.choice(self._used_keys)
 
         start = time()
-        node_port = self._current_system.clients[client_idx].read(key)
+        node_port = self._current_system.clients[client_idx].read(key)['port']
         end = time()
 
         latency = end - start
@@ -95,8 +83,4 @@ class Experiment:
         return latency, read_on_leader
 
     def _is_leader(self, port):
-        return False
-        if self._current_system.ports[-1] == port:
-            return True
-
-        return False
+        return self._current_system.ports[-1] == port
