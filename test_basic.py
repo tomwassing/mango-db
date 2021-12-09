@@ -32,7 +32,8 @@ class TestSimpleTest:
         for process in self.processes:
             process.join()
 
-    def test_read_after_write(self):
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_read_after_write(self, execution_number):
         client = self.clients[0]
         client.write("World!", 'Hello?')
         read_value = client.read('World!')["value"]
@@ -40,7 +41,8 @@ class TestSimpleTest:
 
         assert read_value == 'Hello?' and order_index == 0
 
-    def test_read_after_five_writes(self):
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_read_after_five_writes(self, execution_number):
         client = self.clients[0]
         client2 = self.clients[1]
         client.write("World!", 'Hello1?')
@@ -54,7 +56,8 @@ class TestSimpleTest:
 
         assert read_value == 'Hello5?' and order_index == 4
 
-    def test_multi_sync(self):
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_multi_sync(self, execution_number):
         client = self.clients[0]
         for i in range(100):
             client.write("World!", f"Hello{i}?")
@@ -64,7 +67,8 @@ class TestSimpleTest:
 
         assert read_value == 'Hello99?' and order_index == 99
 
-    def test_write_read_different_client(self):
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_write_read_different_client(self, execution_number):
         write_client, read_client = random.sample(self.clients, 2)
         write_client.write("World!", 'Hello')
 
@@ -147,6 +151,7 @@ class TestConsistency:
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_multi_async_single_client(self, execution_number):
+        values = []
         client = self.clients[0]
         for i in range(100):
             client.write("World!", f"Hello{i}?", blocking=False)
@@ -154,10 +159,19 @@ class TestConsistency:
         for i in range(100):
             client.write_recv()
 
-        assert client.read('World!')["order_index"] ==  99
+        for port in self.node_ports:
+            values.append((client.read('World!', port=port)["value"], client.read('World!', port=port)["order_index"]))
+
+        value_set = set(values)
+        length = len(value_set)
+        if length == 1:
+            order_index = value_set.pop()
+
+            assert order_index[1] == 99
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_multi_async_multi_client(self, execution_number):
+        values = []
         clients = [self.clients[x] for x in range(4)]
         for i in range(100):
             client = clients[i%4]
@@ -167,4 +181,12 @@ class TestConsistency:
             client = clients[i%4]
             client.write_recv()
 
-        assert self.clients[random.choice([x for x in range(3)])].read('World!')["order_index"] ==  99
+        for port in self.node_ports:
+            values.append((client.read('World!', port=port)["value"], client.read('World!', port=port)["order_index"]))
+
+        value_set = set(values)
+        length = len(value_set)
+        if length == 1:
+            order_index = value_set.pop()
+
+            assert order_index[1] == 99
