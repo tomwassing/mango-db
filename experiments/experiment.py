@@ -5,7 +5,7 @@ import numpy as np
 
 class Experiment:
 
-    def __init__(self, experiment_name, systems, n_reads, n_writes, p_key_repeat):
+    def __init__(self, experiment_name, systems, n_reads, n_writes):
 
         self.experiment_name = experiment_name
         self.systems = systems
@@ -14,7 +14,6 @@ class Experiment:
         self.n_reads = n_reads
         self.n_writes = n_writes
 
-        self.p_key_repeat = p_key_repeat
         self._used_keys = []
 
     def _setup(self):
@@ -24,8 +23,8 @@ class Experiment:
         self._setup()
 
     def __str__(self):
-        return "{}\n\tn_reads: {}\n\tn_writes: {}\n\tp_key_repeat: {}".format(
-            self.experiment_name, self.n_reads, self.n_writes, self.p_key_repeat
+        return "{}\n\tn_reads: {}\n\tn_writes: {}".format(
+            self.experiment_name, self.n_reads, self.n_writes
         )
 
     def _run(self, experiment_func, repeat):
@@ -34,7 +33,9 @@ class Experiment:
             self._current_system.start()
             for latency, operation, on_leader in experiment_func():
                 system_name = self._current_system.name
-                yield [system_name, run_id, latency, operation, on_leader]
+                n_nodes = self._current_system.num_nodes
+                n_clients = self._current_system.num_clients
+                yield [system_name, run_id, latency, operation, on_leader, n_nodes, n_clients]
 
             self._current_system.shutdown()
 

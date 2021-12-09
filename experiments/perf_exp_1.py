@@ -10,7 +10,6 @@ from system import System
 def experiment_func():
 
     # Alternate the reads and writes
-    print('read/write in alternation with zipf distribution for keys')
     experiment.reset()
     n_writes = experiment.n_writes
     n_reads = experiment.n_reads
@@ -40,19 +39,24 @@ def experiment_func():
 
 if __name__ == '__main__':
 
-    our_system = System(name='ordering_after_write', num_nodes=2, num_clients=1, port=27000)
-    benchmark_system = System(name='ordering_before_write', num_nodes=2, num_clients=1, port=28000, order_on_write=True)
+    systems = [
+        System(name='ordering_after_write_2_nodes_1_client', num_nodes=2, num_clients=1, port=27000),
+        System(name='ordering_before_write_2_nodes_1_client', num_nodes=2, num_clients=1, port=27000, order_on_write=True),
+        System(name='ordering_after_write_4_nodes_1_client', num_nodes=4, num_clients=1, port=27000),
+        System(name='ordering_before_write_4_nodes_1_client', num_nodes=4, num_clients=1, port=27000, order_on_write=True),
+        System(name='ordering_after_write_8_nodes_1_client', num_nodes=8, num_clients=1, port=27000),
+        System(name='ordering_before_write_8_nodes_1_client', num_nodes=8, num_clients=1, port=27000, order_on_write=True),
+    ]
 
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
-        systems=[our_system, benchmark_system],
-        n_writes=10,
-        n_reads=10,
-        p_key_repeat=0
+        systems=systems,
+        n_writes=100,
+        n_reads=100,
     )
 
     # Run experiment 5 times
-    results = pd.DataFrame(columns=["system_name", "run_id", "latency", "operation", "on_leader"])
+    results = pd.DataFrame(columns=["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients"])
 
     print("{}".format(experiment.__str__()))
 
