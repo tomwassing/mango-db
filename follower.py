@@ -136,7 +136,7 @@ class Follower(Node):
             self.send_client_write_ack(msg_id)
 
     def send_write_result(self, client_addr, key, value):
-        print("send_write_result", client_addr, key, value)
+        # print("send_write_result", client_addr, key, value)
         data = {
             "type": "write_result",
             "key": key,

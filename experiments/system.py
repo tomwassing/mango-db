@@ -9,11 +9,12 @@ from threading import Thread
 
 class System:
 
-    def __init__(self, name, num_nodes, num_clients, port):
+    def __init__(self, name, num_nodes, num_clients, port, order_on_write=False):
         self.name = name
         self.num_nodes = num_nodes
         self.num_clients = num_clients
         self.ports = list(range(port, port + num_nodes))
+        self.order_on_write = order_on_write
 
         self.leader = None
         self.followers = None
@@ -29,8 +30,8 @@ class System:
         for thread in self.threads: thread.join()
 
     def _startup_nodes(self):
-        self.leader = Leader(self.ports[-1], self.ports[:-1], self.ports[-1])
-        self.followers = [Follower(port, [p for p in self.ports if p != port], self.ports[-1]) for port in self.ports[:-1]]
+        self.leader = Leader(self.ports[-1], self.ports[:-1], self.ports[-1], self.order_on_write)
+        self.followers = [Follower(port, [p for p in self.ports if p != port], self.ports[-1], self.order_on_write) for port in self.ports[:-1]]
 
         self.threads = [Thread(target=node.run) for node in [self.leader, *self.followers]]
 

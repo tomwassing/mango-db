@@ -1,3 +1,5 @@
 pytest==6.2.5
 pandas
 numpy
+jupyter
+matplotlib

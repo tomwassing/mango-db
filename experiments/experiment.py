@@ -1,7 +1,6 @@
 from uuid import uuid4
 import random
 from time import time
-import numpy as np
 
 
 class Experiment:
@@ -22,8 +21,6 @@ class Experiment:
     def _setup(self):
         self._unused_keys = self.keys.copy()
         self._used_keys = []
-        # this could be helpful for functional test to verify the content
-        # self.data = {key: 0 for key in self.keys}
 
     def _reset_after_run(self):
         self._setup()
@@ -34,13 +31,17 @@ class Experiment:
         )
 
     def _run(self, experiment_func, repeat):
-        for i in range(repeat):
-            print('run: {}'.format(i))
+        for run_id in range(repeat):
+            print('run: {}'.format(run_id))
             self._current_system.start()
-            write_latencies, read_latencies = experiment_func()
+            for latency, operation, on_leader in experiment_func():
+                system_name = self._current_system.name
+                yield [system_name, run_id, latency, operation, on_leader]
+
             self._current_system.shutdown()
             self._reset_after_run()
-            yield write_latencies, read_latencies
+
+            # yield run_ids, latencies, operations, on_leader
 
     def run(self, experiment_func, repeat=1):
         print("Start experiment")
@@ -48,28 +49,24 @@ class Experiment:
         for system in self.systems:
             print(system.name)
             self._current_system = system
-            mean_w_lats, mean_r_lats = [], []
-
-            for write_latencies, read_latencies in self._run(experiment_func, repeat):
-                mean_w_lats.append(np.mean(write_latencies))
-                mean_r_lats.append(np.mean(read_latencies))
-
+            for result in self._run(experiment_func, repeat):
+                yield result
             self._current_system = None
-            yield {
-                "system": system.name,
-                "mean_w_lats": mean_w_lats,
-                "mean_r_lats": mean_r_lats
-            }
 
         print("Experiment completed\n\n")
 
+    def reset(self):
+        self._setup()
+
     def _get_key_value_pair(self):
-        repeat_key = random.random() <= self.p_key_repeat
+        repeat_key = random.random() <= self.p_key_repeat # make distribution
         value = len(self.keys)
 
         if repeat_key and len(self._used_keys) > 0:
             key = random.choice(self._used_keys)
         else:
+            if len(self._unused_keys) == 0:
+                raise Exception('no unused key to write on')
             key = self._unused_keys.pop()
             self._used_keys.append(key)
 
@@ -79,16 +76,27 @@ class Experiment:
         key, value = self._get_key_value_pair()
 
         start = time()
-        self._current_system.clients[client_idx].write(key, value)
+        node_port = self._current_system.clients[client_idx].write(key, value)
         end = time()
 
-        return end-start
+        latency = end-start
+        write_on_leader = self._is_leader(node_port)
+        return latency, write_on_leader
 
     def client_read(self, client_idx):
         key = random.choice(self._used_keys)
 
         start = time()
-        self._current_system.clients[client_idx].read(key)
+        node_port = self._current_system.clients[client_idx].read(key)
         end = time()
 
-        return end - start
+        latency = end - start
+        read_on_leader = self._is_leader(node_port)
+        return latency, read_on_leader
+
+    def _is_leader(self, port):
+        return False
+        if self._current_system.ports[-1] == port:
+            return True
+
+        return False
