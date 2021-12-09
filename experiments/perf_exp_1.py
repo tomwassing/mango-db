@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+from time import time
 import numpy as np
 import random
 
@@ -34,8 +35,6 @@ def experiment_func():
 
         yield latency, operation, on_leader
 
-    return results
-
 
 if __name__ == '__main__':
 
@@ -56,12 +55,21 @@ if __name__ == '__main__':
     )
 
     # Run experiment 5 times
-    results = pd.DataFrame(columns=["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients"])
-
     print("{}".format(experiment.__str__()))
+    start = time()
+    results = []
+    # results = pd.DataFrame(columns=["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients"])
 
     for result in experiment.run(experiment_func, repeat=10):
-        results.loc[results.shape[0]] = result
+        # results.loc[results.shape[0]] = result
+        results.append(result)
+
+    results = pd.DataFrame(
+        columns=["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients"],
+        data=results
+    )
+    end = time()
+    print('Time: ', end-start)
 
     # Save experiment results
     results.to_csv("./results/experiment1_{}.csv".format(datetime.today().strftime("%Y%m%d%H%M%S")), index=False)
