@@ -31,7 +31,7 @@ class Experiment:
         for run_id in range(repeat):
             print('run: {}'.format(run_id))
             self._current_system.start()
-            for latency, operation, on_leader in experiment_func():
+            for latency, operation, on_leader in experiment_func(self):
                 system_name = self._current_system.name
                 n_nodes = self._current_system.num_nodes
                 n_clients = self._current_system.num_clients
