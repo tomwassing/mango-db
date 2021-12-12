@@ -51,6 +51,7 @@ class DasSystem(System):
     def __init__(self, num_clients, port, order_on_write=False):
         self.hostname = socket.gethostname()
         self.hostnames = os.getenv('HOSTS').split()
+        self.port = port
 
         super().__init__('DAS', len(self.hostnames) - 1, num_clients, port, order_on_write)
 
