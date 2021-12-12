@@ -6,7 +6,7 @@ from leader import Leader
 from client import Client
 
 
-def setup(num_nodes, num_clients, start_port=25000):
+def setup(num_nodes, num_clients, start_port=25000, delayed=False):
 
     node_ports = list(range(start_port, start_port + num_nodes))
     node_hosts = [("127.0.0.1", port) for port in node_ports]
@@ -15,20 +15,9 @@ def setup(num_nodes, num_clients, start_port=25000):
     threads = [threading.Thread(target=node.run) for node in [leader, *nodes]]
     clients = [Client(node_hosts) for _ in range(num_clients)]
 
-    for thread in threads:
-        thread.start()
-
-    return node_hosts, nodes, leader, clients, threads
-
-def setup_delay(num_nodes, num_clients, start_port=25000):
-    node_ports = list(range(start_port, start_port + num_nodes))
-    node_hosts = [("127.0.0.1", port) for port in node_ports]
-    nodes = [Follower(port, [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
-    leader = Leader(node_hosts[-1][1], node_hosts[:-1], node_hosts[-1])
-
     threads = []
     for i, node in enumerate([leader, *nodes]):
-        if i == 1:
+        if i == 1 and delayed:
             threads.append(threading.Thread(target=node.run_delayed))
         else:
             threads.append(threading.Thread(target=node.run))
@@ -217,7 +206,7 @@ class TestConsistency:
 class TestConsistency_delay:
 
     def setup_method(self, method):
-        node_hosts, nodes, leader, clients, threads = setup_delay(5, 4)
+        node_hosts, nodes, leader, clients, threads = setup(5, 4, delayed=True)
         self.node_hosts = node_hosts
         self.nodes = nodes
         self.leader = leader
