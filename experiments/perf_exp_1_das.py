@@ -11,7 +11,7 @@ from system import DasSystem
 import perf_exp_1
 
 def main():
-    hostnames = os.getenv('HOSTNAMES').split()
+    hostnames = os.getenv('HOSTS').split()
     hostname = socket.gethostname()
 
     if hostname != hostnames[0]:
