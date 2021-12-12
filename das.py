@@ -31,7 +31,6 @@ def main(port=25000):
 
     is_client = hostname == hostnames[0]
     is_leader = hostname == hostnames[-1]
-    node_hosts = [(h, port) for h in hostnames[1:-1] if h != hostname]
 
     if is_client:
         client = Client([(h, port) for h in hostnames if h != hostname])
@@ -46,10 +45,10 @@ def main(port=25000):
         client.exit()
 
     elif is_leader:
-        leader = Leader(host, node_hosts, (hostname, port))
+        leader = Leader(host, [(h, port) for h in hostnames[1:] if h != hostname], host)
         leader.run()
     else:
-        follower = Follower(host, node_hosts, (hostname, port))
+        follower = Follower(host, [(h, port) for h in hostnames[1:-1] if h != hostname], (hostnames[-1], port))
         follower.run()
 
 
