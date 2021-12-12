@@ -48,7 +48,7 @@ def main(port=25000):
         leader = Leader(host, [(h, port) for h in hostnames[1:] if h != hostname], host)
         leader.run()
     else:
-        follower = Follower(host, [(h, port) for h in hostnames[1:-1] if h != hostname], (hostnames[-1], port))
+        follower = Follower(host, [(h, port) for h in hostnames[1:] if h != hostname], (hostnames[-1], port))
         follower.run()
 
 
