@@ -1,5 +1,4 @@
 from datetime import datetime
-import pandas as pd
 from time import time
 import random
 
@@ -48,6 +47,7 @@ def experiment_func():
 
 
 if __name__ == '__main__':
+    import pandas as pd
 
     systems = [
         # System(name='ordering_after_write_2_nodes_1_client', num_nodes=2, num_clients=1, port=27000),
