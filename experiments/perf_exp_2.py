@@ -1,6 +1,6 @@
 from datetime import datetime
-from time import time
 import random
+from time import perf_counter
 
 from experiment import Experiment
 from system import System
@@ -87,7 +87,7 @@ def run_experiment(experiment, experiment_func, result_filename, checkpoint):
     import pandas as pd
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
-    start = time()
+    start = perf_counter()
     results = []
 
     intermediate_df = None
@@ -111,7 +111,7 @@ def run_experiment(experiment, experiment_func, result_filename, checkpoint):
                  "order_on_write"],
         data=results
     )
-    end = time()
+    end = perf_counter()
     print('Time: ', end - start)
 
     # Save experiment results

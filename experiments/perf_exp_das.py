@@ -34,7 +34,7 @@ def main():
 
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
-    start = time()
+    start = time.perf_counter()
 
     results = list(experiment.run(perf_exp_2.read_heave_exp_func, repeat=1))
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
@@ -45,7 +45,7 @@ def main():
         writer.writerow(columns)
         writer.writerows(results)
 
-    end = time()
+    end = time.perf_counter()
     print('Time: ', end-start)
 
 

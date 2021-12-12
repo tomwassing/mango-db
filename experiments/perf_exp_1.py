@@ -1,5 +1,5 @@
 from datetime import datetime
-from time import time
+from time import perf_counter
 import random
 
 from experiment import Experiment
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
-    start = time()
+    start = perf_counter()
     results = []
     checkpoint = 4000000
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
         columns=["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"],
         data=results
     )
-    end = time()
+    end = perf_counter()
     print('Time: ', end-start)
 
     # Save experiment results
