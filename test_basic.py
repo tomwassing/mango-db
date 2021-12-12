@@ -217,13 +217,6 @@ class TestConsistency:
 class TestConsistency_delay:
 
     def setup_method(self, method):
-        # node_ports, nodes, leader, clients, processes = setup_delay(5, 4)
-        # self.node_ports = node_ports
-        # self.nodes = nodes
-        # self.leader = leader
-        # self.clients = clients
-        # self.processes = processes
-
         node_hosts, nodes, leader, clients, threads = setup_delay(5, 4)
         self.node_hosts = node_hosts
         self.nodes = nodes
@@ -238,7 +231,7 @@ class TestConsistency_delay:
             thread.join()
 
 
-    @pytest.mark.parametrize('execution_number', range(1))
+    @pytest.mark.parametrize('execution_number', range(10))
     def test_out_of_order(self, execution_number):
         values = []
         client = self.clients[0]
