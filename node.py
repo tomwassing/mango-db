@@ -4,6 +4,7 @@ import json
 import random
 import signal
 import socket
+import time
 
 
 class Node:
@@ -24,6 +25,14 @@ class Node:
             data, addr = self.socket.recvfrom(1024)
             message = json.loads(data.decode())
             logging.debug("{}, received message: {} from {}".format(self, message, addr))
+            self.on_message(addr, message)
+
+    def run_delayed(self):
+        while self.is_connected:
+            time.sleep(.05)
+            data, addr = self.socket.recvfrom(1024)
+            message = json.loads(data.decode())
+            logging.debug(f"{self}, received message: {message} from {addr}")
             self.on_message(addr, message)
 
     def send_to_all(self, data):

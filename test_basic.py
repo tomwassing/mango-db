@@ -20,6 +20,26 @@ def setup(num_nodes, num_clients, start_port=25000):
 
     return node_hosts, nodes, leader, clients, threads
 
+def setup_delay(num_nodes, num_clients, start_port=25000):
+    node_ports = list(range(start_port, start_port + num_nodes))
+    node_hosts = [("127.0.0.1", port) for port in node_ports]
+    nodes = [Follower(port, [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_hosts[-1][1], node_hosts[:-1], node_hosts[-1])
+
+    threads = []
+    for i, node in enumerate([leader, *nodes]):
+        if i == 1:
+            threads.append(threading.Thread(target=node.run_delayed))
+        else:
+            threads.append(threading.Thread(target=node.run))
+
+    clients = [Client(node_hosts) for _ in range(num_clients)]
+
+    for thread in threads:
+        thread.start()
+
+    return node_hosts, nodes, leader, clients, threads
+
 class TestSimpleTest:
     def setup_method(self, method):
         _, nodes, leader, clients, threads = setup(3, 5)
@@ -192,3 +212,43 @@ class TestConsistency:
             order_index = value_set.pop()
 
             assert order_index[1] == 99
+
+
+class TestConsistency_delay:
+
+    def setup_method(self, method):
+        node_hosts, nodes, leader, clients, threads = setup_delay(5, 4)
+        self.node_hosts = node_hosts
+        self.nodes = nodes
+        self.leader = leader
+        self.clients = clients
+        self.threads = threads
+
+    def teardown_method(self):
+        for client in self.clients:
+            client.exit()
+        for thread in self.threads:
+            thread.join()
+
+
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_out_of_order(self, execution_number):
+        values = []
+        client = self.clients[0]
+        print(self.node_hosts)
+        for i in range(5):
+            if i == 2:
+                client.write("World!", f"Hello{i}?", host=self.node_hosts[0], blocking=False)
+            else:
+                client.write("World!", f"Hello{i}?", host=self.node_hosts[1], blocking=False)
+        for i in range(5):
+            client.write_recv()
+
+        for host in self.node_hosts:
+            values.append((client.read('World!', host=host)["value"], client.read('World!', host=host)["order_index"]))
+
+        value_set = set(values)
+        length = len(value_set)
+        if length == 1:
+            order_index = value_set.pop()
+            assert order_index[1] == 4 and order_index[0] == 'Hello2?'
