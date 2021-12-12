@@ -34,7 +34,7 @@ def main(port=25000):
     node_hosts = [(h, port) for h in hostnames[1:-1] if h != hostname]
 
     if is_client:
-        client = Client(node_hosts)
+        client = Client([(h, port) for h in hostnames if h != hostname])
         time.sleep(5)
 
         client.write("World!", 'Hello1?')
