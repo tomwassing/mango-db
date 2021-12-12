@@ -32,7 +32,7 @@ class Node:
             time.sleep(.05)
             data, addr = self.socket.recvfrom(1024)
             message = json.loads(data.decode())
-            logging.debug(f"{self}, received message: {message} from {addr}")
+            logging.debug("{}, received message: {} from {}".format(self, message, addr))
             self.on_message(addr, message)
 
     def send_to_all(self, data):
