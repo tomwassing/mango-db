@@ -1,4 +1,5 @@
 import os
+import socket
 from client import Client
 from follower import Follower
 import signal
@@ -21,7 +22,7 @@ def main(port=25000):
 
 
     hostnames = os.getenv('HOSTS').split()
-    hostname = os.getenv('HOSTNAME')
+    hostname = socket.gethostname()
 
     logging.info('Starting server on {}'.format(hostname))
     logging.info("Found {} hosts: {}".format(len(hostnames), hostnames))
