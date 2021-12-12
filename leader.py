@@ -19,11 +19,12 @@ class Leader(Follower):
         if data["type"] == "client_write_ack":
             self.handle_client_write_ack(addr, data)
 
-    def store_data(self, msg_id, key, value, client_addr):
-        self.data[key] = (value, self.order_index)
+    def store_data(self, msg_id, keys, values, client_addr):
+        for i in range(len(keys)):
+            self.data[keys[i]] = (values[i], self.order_index)
         del self.write_buffer[msg_id]
 
-        logging.info("{}: saved '{} = {}'".format(self, key, value))
+        logging.info("{}: saved '{} = {}'".format(self, keys, values))
 
         data = {
             "type": "write_order",
@@ -35,7 +36,7 @@ class Leader(Follower):
         self.order_index += 1
 
         if self.order_on_write and client_addr:
-            self.send_write_result(client_addr, key, value)
+            self.send_write_result(client_addr, keys, values)
 
     def __str__(self) -> str:
         return "Leader:{}:{}".format(self.host[0], self.host[1])

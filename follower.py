@@ -19,18 +19,18 @@ class Follower(Node):
         logging.info("{}: constructed with hosts: {}".format(self, node_hosts))
 
 
-    def write(self, key, value, addr):
+    def write(self, keys, values, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
         msg_id = "{}:{}:{}".format(self.host[0], self.host[1], self.write_id)
-        self.ack_buffer[msg_id] = PendingElement(key, value, msg_id, addr)
+        self.ack_buffer[msg_id] = PendingElement(keys, values, msg_id, addr)
         self.write_id += 1
 
         data = {
             "type": "write",
             "id": msg_id,
-            "key": key,
-            "value": value,
+            "keys": keys,
+            "values": values,
             "from": self.host,
         }
 
@@ -38,13 +38,15 @@ class Follower(Node):
         return msg_id
 
     def is_key_pending(self, key):
+        logging.info(f"Ack_buffer: {self.ack_buffer.values()}, write_buffer: {self.write_buffer.values()}")
         for value in self.ack_buffer.values():
-            if value.key == key:
-                print("ack_buffer", self.ack_buffer)
-                return True
+            for k in value.keys:
+                if k == key:
+                    print("ack_buffer", self.ack_buffer)
+                    return True
 
         for value in self.write_buffer.values():
-            if value[0] == key:
+            if value[0][0] == key:
                 return True
 
         return False
@@ -54,16 +56,17 @@ class Follower(Node):
 
         for write_order in list(sorted(self.order_buffer, key=lambda x: x["index"])):
             if write_order["index"] == self.order_index:
-                key, value, client_addr = self.write_buffer[write_order["id"]]
+                keys, values, client_addr = self.write_buffer[write_order["id"]]
                 del self.write_buffer[write_order["id"]]
                 self.order_buffer.remove(write_order)
 
-                logging.debug("{}: saved {} = {} of message: {}".format(self, key, value, write_order['id']))
-                self.data[key] = (value, self.order_index)
+                logging.debug("{}: saved {} = {} of message: {}".format(self, keys, values, write_order['id']))
+                for i in range(len(keys)):
+                    self.data[keys[i]] = (values[i], self.order_index)
                 self.order_index += 1
 
                 if self.order_on_write and client_addr:
-                    self.send_write_result(client_addr, key, value)
+                    self.send_write_result(client_addr, keys, values)
 
             else:
                 break
@@ -86,24 +89,27 @@ class Follower(Node):
     def handle_client_read(self, addr, data):
         key = data["key"]
         if self.is_key_pending(key):
+            logging.info("READ IS PENDING")
             self.read_buffer[key].append(addr)
         else:
+            logging.info(f"READ IS ALREADY SAVED by {self}")
             data = {
                 "type": "read_result",
                 "key": key,
                 "value": self.data[key][0],
                 "order_index": self.data[key][1]
             }
+            logging.info("SENDING????????????????")
 
             self.send(addr, data)
 
     def handle_client_write(self, addr, data):
-        self.write(data["key"], data["value"], addr)
+        self.write(data["keys"], data["values"], addr)
 
     def handle_write(self, addr, data):
         # Handling incoming write message from other nodes. Ack the message and
         # add to own write buffer.
-        self.write_buffer[data["id"]] = (data["key"], data["value"], None)
+        self.write_buffer[data["id"]] = (data["keys"], data["values"], None)
 
         data = {
             "type": "acknowledge",
@@ -130,12 +136,12 @@ class Follower(Node):
         if self.ack_buffer[msg_id].is_complete(len(self.node_hosts)):
             logging.debug("{}: received all acknowledgements for message: {}".format(self, msg_id))
             pending_element = self.ack_buffer[msg_id]
-            self.write_buffer[msg_id] = (pending_element.key, pending_element.value, pending_element.client_addr)
+            self.write_buffer[msg_id] = (pending_element.keys, pending_element.values, pending_element.client_addr)
             del self.ack_buffer[msg_id]
 
             if not self.order_on_write:
                 self.send_write_result(pending_element.client_addr,
-                    pending_element.key, pending_element.value)
+                    pending_element.keys, pending_element.values)
             self.send_client_write_ack(msg_id)
 
     def send_write_result(self, client_addr, key, value):

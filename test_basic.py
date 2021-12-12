@@ -46,7 +46,7 @@ class TestSimpleTest:
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write(self, execution_number):
         client = self.clients[0]
-        client.write("World!", 'Hello?')
+        client.write(("World!", "keyTest"), ('Hello?', "valueTest"))
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
 

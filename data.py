@@ -1,8 +1,8 @@
 
 class PendingElement:
-    def __init__(self, key, value, msg_id, client_addr):
-        self.key = key
-        self.value = value
+    def __init__(self, keys, values, msg_id, client_addr):
+        self.keys = keys
+        self.values = values
         self.msg_id = msg_id
         self.acknowledged = set()
         self.client_addr = client_addr
