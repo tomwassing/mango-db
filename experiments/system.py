@@ -55,7 +55,7 @@ class DasSystem(System):
         self.port = port
 
         super().__init__('DAS', len(self.hostnames) - 1, num_clients, port, order_on_write)
-        self.node_hosts = list(zip(self.hostnames, self.ports))
+        self.node_hosts = list(zip(self.hostnames, port))
 
 
     
