@@ -13,6 +13,8 @@ class Client:
         self.socket.bind(("", 0))
         self.socket.settimeout(5)
 
+        logging.info("Client: constructed with hosts: {}".format(node_hosts))
+
     # Sync operation
     def send_recv(self, data, host=None):
         if not host:

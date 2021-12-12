@@ -16,6 +16,9 @@ class Follower(Node):
         self.leader_host = leader_host
         self.order_on_write = order_on_write
 
+        logging.info("{}: constructed with hosts: {}".format(self, node_hosts))
+
+
     def write(self, key, value, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
