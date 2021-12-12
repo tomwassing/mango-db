@@ -22,6 +22,8 @@ def main():
         system.start()
         return
 
+    time.sleep(10)
+
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
         systems=[system],
