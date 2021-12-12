@@ -38,7 +38,6 @@ class Follower(Node):
         return msg_id
 
     def is_key_pending(self, key):
-        logging.info(f"Ack_buffer: {self.ack_buffer.values()}, write_buffer: {self.write_buffer.values()}")
         for value in self.ack_buffer.values():
             for k in value.keys:
                 if k == key:
@@ -89,17 +88,14 @@ class Follower(Node):
     def handle_client_read(self, addr, data):
         key = data["key"]
         if self.is_key_pending(key):
-            logging.info("READ IS PENDING")
             self.read_buffer[key].append(addr)
         else:
-            logging.info(f"READ IS ALREADY SAVED by {self}")
             data = {
                 "type": "read_result",
                 "key": key,
                 "value": self.data[key][0],
                 "order_index": self.data[key][1]
             }
-            logging.info("SENDING????????????????")
 
             self.send(addr, data)
 
