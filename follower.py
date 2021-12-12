@@ -4,8 +4,8 @@ from node import Node
 import logging
 import sys
 class Follower(Node):
-    def __init__(self, port, node_hosts, leader_host, order_on_write=False):
-        super().__init__(port, node_hosts, leader_host)
+    def __init__(self, host, node_hosts, leader_host, order_on_write=False):
+        super().__init__(host, node_hosts, leader_host)
         self.ack_buffer = {}
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
@@ -19,7 +19,7 @@ class Follower(Node):
     def write(self, key, value, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
-        msg_id = "{}:{}".format(self.port,self.write_id)
+        msg_id = "{}:{}".format(self.host, self.write_id)
         self.ack_buffer[msg_id] = PendingElement(key, value, msg_id, addr)
         self.write_id += 1
 
@@ -28,7 +28,7 @@ class Follower(Node):
             "id": msg_id,
             "key": key,
             "value": value,
-            "from": self.port,
+            "from": self.host,
         }
 
         self.send_to_all(data)
@@ -105,7 +105,7 @@ class Follower(Node):
         data = {
             "type": "acknowledge",
             "id": data["id"],
-            "from": self.port,
+            "from": self.host,
         }
 
         self.send(addr, data)
@@ -163,4 +163,4 @@ class Follower(Node):
             self.handle_acknowledge(addr, data)
 
     def __str__(self) -> str:
-        return "Follower:{}".format(self.port)
+        return "Follower:{}".format(self.host)

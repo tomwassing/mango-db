@@ -10,8 +10,8 @@ def setup(num_nodes, num_clients, start_port=25000):
 
     node_ports = list(range(start_port, start_port + num_nodes))
     node_hosts = [("127.0.0.1", port) for port in node_ports]
-    nodes = [Follower(port, [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
-    leader = Leader(node_hosts[-1][1], node_hosts[:-1], node_hosts[-1])
+    nodes = [Follower(("127.0.0.1", port), [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_hosts[-1], node_hosts[:-1], node_hosts[-1])
     threads = [threading.Thread(target=node.run) for node in [leader, *nodes]]
     clients = [Client(node_hosts) for _ in range(num_clients)]
 

@@ -7,16 +7,17 @@ import socket
 
 
 class Node:
-    def __init__(self, port, node_hosts, leader_port):
-        self.port = port
+    def __init__(self, host, node_hosts, leader_port):
+        self.host = host
+        self.port = host[1]
         self.node_hosts = node_hosts
         self.leader = leader_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind(("", port))
+        self.socket.bind(("", self.port))
         self.is_connected = True
 
-        logging.info("{} listining on port {}".format(self, port))
+        logging.info("{} listining on port {}".format(self, self.port))
 
     def run(self):
         while self.is_connected:
@@ -37,7 +38,7 @@ class Node:
         pass
 
     def __str__(self) -> str:
-        return "Node:{}".format(self.port)
+        return "Node:{}".format(self.host)
 
     def __repr__(self) -> str:
         return self.__str__()

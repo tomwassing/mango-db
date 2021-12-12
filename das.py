@@ -22,6 +22,7 @@ def main(port=25000):
 
     hostnames = os.getenv('HOSTS').split()
     hostname = os.getenv('HOSTNAME')
+    host = (hostname, port)
 
     is_client = hostname == hostnames[0]
     is_leader = hostname == hostnames[-1]
@@ -40,10 +41,10 @@ def main(port=25000):
         client.exit()
 
     elif is_leader:
-        leader = Leader(port, node_hosts, (hostname, port))
+        leader = Leader(host, node_hosts, (hostname, port))
         leader.run()
     else:
-        follower = Follower(port, node_hosts, (hostname, port))
+        follower = Follower(host, node_hosts, (hostname, port))
         follower.run()
 
 

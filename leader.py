@@ -38,4 +38,4 @@ class Leader(Follower):
             self.send_write_result(client_addr, key, value)
 
     def __str__(self) -> str:
-        return "Leader:{}".format(self.port)
+        return "Leader:{}".format(self.host)
