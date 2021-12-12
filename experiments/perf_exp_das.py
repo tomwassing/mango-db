@@ -3,7 +3,7 @@ import socket
 import os
 import csv
 import logging
-from time import time
+import time
 
 from experiment import Experiment
 from system import DasSystem
