@@ -19,7 +19,7 @@ class Follower(Node):
     def write(self, key, value, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
-        msg_id = "{}:{}".format(self.host, self.write_id)
+        msg_id = "{}:{}:{}".format(self.host[0], self.host[1], self.write_id)
         self.ack_buffer[msg_id] = PendingElement(key, value, msg_id, addr)
         self.write_id += 1
 
@@ -163,4 +163,4 @@ class Follower(Node):
             self.handle_acknowledge(addr, data)
 
     def __str__(self) -> str:
-        return "Follower:{}".format(self.host)
+        return "Follower:{}:{}".format(self.host[0], self.host[1])

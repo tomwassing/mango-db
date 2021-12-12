@@ -47,7 +47,7 @@ class Node:
         pass
 
     def __str__(self) -> str:
-        return "Node:{}".format(self.host)
+        return "Node:{}:{}".format(self.host[0], self.host[1])
 
     def __repr__(self) -> str:
         return self.__str__()
