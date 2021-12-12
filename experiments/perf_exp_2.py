@@ -1,5 +1,4 @@
 from datetime import datetime
-import pandas as pd
 from time import time
 import random
 
@@ -85,6 +84,7 @@ def write_heavy_exp_func(experiment):
         yield latency, operation, on_leader
 
 def run_experiment(experiment, experiment_func, result_filename, checkpoint):
+    import pandas as pd
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
     start = time()
