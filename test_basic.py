@@ -7,30 +7,32 @@ from client import Client
 
 
 def setup(num_nodes, num_clients, start_port=25000):
-    node_ports = list(range(start_port, start_port + num_nodes + num_clients))
-    nodes = [Follower(port, [p for p in node_ports if p != port], node_ports[-1]) for port in node_ports[:-1]]
-    leader = Leader(node_ports[-1], node_ports[:-1], node_ports[-1])
-    processes = [threading.Thread(target=node.run) for node in [leader, *nodes]]
-    clients = [Client(node_ports) for _ in range(num_clients)]
 
-    for process in processes:
-        process.start()
+    node_ports = list(range(start_port, start_port + num_nodes))
+    node_hosts = [("127.0.0.1", port) for port in node_ports]
+    nodes = [Follower(port, [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_hosts[-1][1], node_hosts[:-1], node_hosts[-1])
+    threads = [threading.Thread(target=node.run) for node in [leader, *nodes]]
+    clients = [Client(node_hosts) for _ in range(num_clients)]
 
-    return node_ports, nodes, leader, clients, processes
+    for thread in threads:
+        thread.start()
+
+    return node_hosts, nodes, leader, clients, threads
 
 class TestSimpleTest:
     def setup_method(self, method):
-        _, nodes, leader, clients, processes = setup(3, 5)
+        _, nodes, leader, clients, threads = setup(3, 5)
         self.nodes = nodes
         self.leader = leader
         self.clients = clients
-        self.processes = processes
+        self.threads = threads
 
     def teardown_method(self):
         for client in self.clients:
             client.exit()
-        for process in self.processes:
-            process.join()
+        for thread in self.threads:
+            thread.join()
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write(self, execution_number):
@@ -77,26 +79,26 @@ class TestSimpleTest:
 class TestDurability:
 
     def setup_method(self, method):
-        node_ports, nodes, leader, clients, processes = setup(5, 2)
-        self.node_ports = node_ports
+        node_hosts, nodes, leader, clients, threads = setup(5, 2)
+        self.node_hosts = node_hosts
         self.nodes = nodes
         self.leader = leader
         self.clients = clients
-        self.processes = processes
+        self.threads = threads
 
     def teardown_method(self):
         for client in self.clients:
             client.exit()
-        for process in self.processes:
-            process.join()
+        for thread in self.threads:
+            thread.join()
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_fe1(self, execution_number):
         values = []
         client = self.clients[0]
         client.write("World!", 'Hello?')
-        for port in self.node_ports:
-            values.append(client.read('World!', port=port)["value"])
+        for host in self.node_hosts:
+            values.append(client.read('World!', host=host)["value"])
 
         assert len(set(values)) == 1
 
@@ -105,15 +107,15 @@ class TestDurability:
         values = []
         client = self.clients[0]
         client.write("World!", 'Hello?')
-        for port in self.node_ports:
-            values.append(client.read('World!', port=port)["value"])
+        for host in self.node_hosts:
+            values.append(client.read('World!', host=host)["value"])
 
         if len(set(values)) == 1:
             client.write("World!", 'Bye!')
 
             values = []
-            for port in self.node_ports:
-                values.append(client.read('World!', port=port)["value"])
+            for host in self.node_hosts:
+                values.append(client.read('World!', host=host)["value"])
 
             assert len(set(values)) == 1 and list(set(values))[0] == 'Bye!'
 
@@ -128,26 +130,26 @@ class TestDurability:
         for i in range(100):
             tmp = client.write_recv()
 
-        for port in self.node_ports:
-            values.append(read_client.read('World!', port=port)["value"])
+        for host in self.node_hosts:
+            values.append(read_client.read('World!', host=host)["value"])
 
         assert len(set(values)) == 1
 
 class TestConsistency:
 
     def setup_method(self, method):
-        node_ports, nodes, leader, clients, processes = setup(5, 4)
-        self.node_ports = node_ports
+        node_hosts, nodes, leader, clients, threads = setup(5, 4)
+        self.node_hosts = node_hosts
         self.nodes = nodes
         self.leader = leader
         self.clients = clients
-        self.processes = processes
+        self.threads = threads
 
     def teardown_method(self):
         for client in self.clients:
             client.exit()
-        for process in self.processes:
-            process.join()
+        for thread in self.threads:
+            thread.join()
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_multi_async_single_client(self, execution_number):
@@ -159,8 +161,8 @@ class TestConsistency:
         for i in range(100):
             client.write_recv()
 
-        for port in self.node_ports:
-            values.append((client.read('World!', port=port)["value"], client.read('World!', port=port)["order_index"]))
+        for host in self.node_hosts:
+            values.append((client.read('World!', host=host)["value"], client.read('World!', host=host)["order_index"]))
 
         value_set = set(values)
         length = len(value_set)
@@ -181,8 +183,8 @@ class TestConsistency:
             client = clients[i%4]
             client.write_recv()
 
-        for port in self.node_ports:
-            values.append((client.read('World!', port=port)["value"], client.read('World!', port=port)["order_index"]))
+        for host in self.node_hosts:
+            values.append((client.read('World!', host=host)["value"], client.read('World!', host=host)["order_index"]))
 
         value_set = set(values)
         length = len(value_set)

@@ -7,9 +7,9 @@ import socket
 
 
 class Node:
-    def __init__(self, port, ports, leader_port):
+    def __init__(self, port, node_hosts, leader_port):
         self.port = port
-        self.ports = ports
+        self.node_hosts = node_hosts
         self.leader = leader_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -26,8 +26,8 @@ class Node:
             self.on_message(addr, message)
 
     def send_to_all(self, data):
-        for port in self.ports:
-            self.send(("127.0.0.1", port), data)
+        for host in self.node_hosts:
+            self.send(host, data)
 
     def send(self, addr, message):
         logging.debug(f"{self}, sent message: {message} to {addr}")

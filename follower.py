@@ -4,8 +4,8 @@ from node import Node
 import logging
 import sys
 class Follower(Node):
-    def __init__(self, port, node_ports, leader_port, order_on_write=False):
-        super().__init__(port, node_ports, leader_port)
+    def __init__(self, port, node_hosts, leader_host, order_on_write=False):
+        super().__init__(port, node_hosts, leader_host)
         self.ack_buffer = {}
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
@@ -13,7 +13,7 @@ class Follower(Node):
         self.data = {}
         self.order_index = 0
         self.order_buffer = []
-        self.leader_port = leader_port
+        self.leader_host = leader_host
         self.order_on_write = order_on_write
 
     def write(self, key, value, addr):
@@ -116,7 +116,7 @@ class Follower(Node):
             "id": msg_id,
         }
 
-        self.send(("127.0.0.1", self.leader_port), data)
+        self.send(self.leader_host, data)
 
     def handle_acknowledge(self, addr, data):
         # Receiving ack message from other nodes, finalize if all ack messages
@@ -124,7 +124,7 @@ class Follower(Node):
         msg_id = data["id"]
         self.ack_buffer[msg_id].acknowledge(addr)
 
-        if self.ack_buffer[msg_id].is_complete(len(self.ports)):
+        if self.ack_buffer[msg_id].is_complete(len(self.node_hosts)):
             logging.debug(f"{self}: received all acknowledgements for message: {msg_id}")
             pending_element = self.ack_buffer[msg_id]
             self.write_buffer[msg_id] = (pending_element.key, pending_element.value, pending_element.client_addr)

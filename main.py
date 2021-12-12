@@ -18,14 +18,15 @@ def main(num_nodes, start_port=25000):
                         level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
 
     node_ports = list(range(start_port, start_port + num_nodes))
-    nodes = [Follower(port, [p for p in node_ports if p != port], node_ports[-1]) for port in node_ports[:-1]]
-    leader = Leader(node_ports[-1], node_ports[:-1], node_ports[-1])
+    node_hosts = [("127.0.0.1", port) for port in node_ports]
+    nodes = [Follower(port, [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
+    leader = Leader(node_hosts[-1][1], node_hosts[:-1], node_hosts[-1])
     threads = [Thread(target=node.run) for node in [leader, *nodes]]
 
     for thread in threads:
         thread.start()
 
-    client = Client(node_ports)
+    client = Client(node_hosts)
     client.write("World!", 'Hello1?')
     client.write("World!", 'Hello2?')
     client.write("World!", 'Hello3?')

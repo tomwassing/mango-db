@@ -5,8 +5,8 @@ import json
 
 
 class Client:
-    def __init__(self, node_ports):
-        self.node_ports = node_ports
+    def __init__(self, node_hosts):
+        self.node_hosts = node_hosts
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -14,20 +14,21 @@ class Client:
         self.socket.settimeout(5)
 
     # Sync operation
-    def send_recv(self, data, port=None):
-        if not port:
-            port = random.choice(self.node_ports)
-        self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
-        logging.info(f"Client: send message to node:{port} : {data}")
+    def send_recv(self, data, host=None):
+        if not host:
+            host = random.choice(self.node_hosts)
+
+        self.socket.sendto(json.dumps(data).encode(), host)
+        logging.info(f"Client: send message to node:{host} : {data}")
         data, addr = self.socket.recvfrom(1024)
         logging.info(f"Client: received message: {data} from {addr}")
-        return {**json.loads(data.decode()), 'port': port}
+        return {**json.loads(data.decode()), 'host': host}
 
     def send_all(self, data):
-        for port in self.node_ports:
-            self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
+        for host in self.node_hosts:
+            self.socket.sendto(json.dumps(data).encode(), host)
 
-    def write(self, key, value, port=None, blocking=True):
+    def write(self, key, value, host=None, blocking=True):
         data = {
             "type": "client_write",
             "key": key,
@@ -35,26 +36,26 @@ class Client:
         }
 
         if blocking:
-            port = self.send_recv(data, port=port)['port']
+            host = self.send_recv(data, host=host)['host']
         else:
-            if not port:
-                port = random.choice(self.node_ports)
-            self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
+            if not host:
+                host = random.choice(self.node_hosts)
+            self.socket.sendto(json.dumps(data).encode(), host)
 
-        return port
+        return host
 
     def write_recv(self):
         data, addr = self.socket.recvfrom(1024)
         logging.info(f"Client: received message: {data} from {addr}")
         return json.loads(data.decode())
 
-    def read(self, key, port=None):
+    def read(self, key, host=None):
         data = {
             "type": "client_read",
             "key": key,
         }
 
-        return self.send_recv(data, port=port)
+        return self.send_recv(data, host=host)
 
     def exit(self):
         data = {
@@ -64,9 +65,9 @@ class Client:
         self.send_all(data)
         self.socket.close()
 
-    def exit_single(self, port):
+    def exit_single(self, host):
         data = {
             "type": "exit"
         }
 
-        self.socket.sendto(json.dumps(data).encode(), ("127.0.0.1", port))
+        self.socket.sendto(json.dumps(data).encode(), host)
