@@ -62,7 +62,7 @@ class TestSimpleTest:
     def test_multi_sync(self, execution_number):
         client = self.clients[0]
         for i in range(100):
-            client.write("World!", f"Hello{i}?")
+            client.write("World!", "Hello{}?".format(i))
 
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
@@ -125,7 +125,7 @@ class TestDurability:
         client = self.clients[0]
         read_client = self.clients[1]
         for i in range(100):
-            client.write("World!", f"Hello{i}?", blocking=False)
+            client.write("World!", "Hello{}?".format(i), blocking=False)
 
         for i in range(100):
             tmp = client.write_recv()
@@ -156,7 +156,7 @@ class TestConsistency:
         values = []
         client = self.clients[0]
         for i in range(100):
-            client.write("World!", f"Hello{i}?", blocking=False)
+            client.write("World!", "Hello{}?".format(i), blocking=False)
 
         for i in range(100):
             client.write_recv()
@@ -177,7 +177,7 @@ class TestConsistency:
         clients = [self.clients[x] for x in range(4)]
         for i in range(100):
             client = clients[i%4]
-            client.write("World!", f"Hello{i}?", blocking=False)
+            client.write("World!", "Hello{}?".format(i), blocking=False)
 
         for i in range(100):
             client = clients[i%4]

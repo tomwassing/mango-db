@@ -14,3 +14,8 @@ pytest
 ```sh
 pytest --log-cli-level=DEBUG
 ```
+
+### Run on DAS
+```
+prun -v -1 -np 4 python3 ./das.py
+```
