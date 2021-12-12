@@ -2,6 +2,7 @@ from datetime import datetime
 import socket
 import os
 import csv
+import logging
 from time import time
 
 from experiment import Experiment
@@ -11,6 +12,8 @@ from system import DasSystem
 import perf_exp_2
 
 def main():
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d - %(levelname)-8s: %(message)s',
+                        level=logging.DEBUG,datefmt='%d-%m-%y %H:%M:%S')
     hostnames = os.getenv('HOSTS').split()
     hostname = socket.gethostname()
 
