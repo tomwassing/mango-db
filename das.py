@@ -1,4 +1,5 @@
 import os
+import socket
 from client import Client
 from follower import Follower
 import signal
@@ -21,7 +22,12 @@ def main(port=25000):
 
 
     hostnames = os.getenv('HOSTS').split()
-    hostname = os.getenv('HOSTNAME')
+    hostname = socket.gethostname()
+
+    logging.info('Starting server on {}'.format(hostname))
+    logging.info("Found {} hosts: {}".format(len(hostnames), hostnames))
+
+    host = (hostname, port)
 
     is_client = hostname == hostnames[0]
     is_leader = hostname == hostnames[-1]
@@ -40,10 +46,10 @@ def main(port=25000):
         client.exit()
 
     elif is_leader:
-        leader = Leader(port, node_hosts, (hostname, port))
+        leader = Leader(host, node_hosts, (hostname, port))
         leader.run()
     else:
-        follower = Follower(port, node_hosts, (hostname, port))
+        follower = Follower(host, node_hosts, (hostname, port))
         follower.run()
 
 

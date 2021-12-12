@@ -23,7 +23,7 @@ class Leader(Follower):
         self.data[key] = (value, self.order_index)
         del self.write_buffer[msg_id]
 
-        logging.info(f"{self}: saved '{key} = {value}'")
+        logging.info("{}: saved '{} = {}'".format(self, key, value))
 
         data = {
             "type": "write_order",
@@ -38,4 +38,4 @@ class Leader(Follower):
             self.send_write_result(client_addr, key, value)
 
     def __str__(self) -> str:
-        return f"Leader:{self.port}"
+        return "Leader:{}".format(self.host)

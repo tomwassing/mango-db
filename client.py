@@ -19,10 +19,14 @@ class Client:
             host = random.choice(self.node_hosts)
 
         self.socket.sendto(json.dumps(data).encode(), host)
-        logging.info(f"Client: send message to node:{host} : {data}")
+        logging.info("Client: send message to node:{} : {}".format(host, data))
         data, addr = self.socket.recvfrom(1024)
-        logging.info(f"Client: received message: {data} from {addr}")
-        return {**json.loads(data.decode()), 'host': host}
+        logging.info("Client: received message: {} from {}".format(data, addr))
+
+        result = json.loads(data.decode())
+        result['host'] = host
+
+        return result
 
     def send_all(self, data):
         for host in self.node_hosts:
@@ -46,7 +50,7 @@ class Client:
 
     def write_recv(self):
         data, addr = self.socket.recvfrom(1024)
-        logging.info(f"Client: received message: {data} from {addr}")
+        logging.info("Client: received message: {} from {}".format(data, addr))
         return json.loads(data.decode())
 
     def read(self, key, host=None):

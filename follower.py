@@ -4,8 +4,8 @@ from node import Node
 import logging
 import sys
 class Follower(Node):
-    def __init__(self, port, node_hosts, leader_host, order_on_write=False):
-        super().__init__(port, node_hosts, leader_host)
+    def __init__(self, host, node_hosts, leader_host, order_on_write=False):
+        super().__init__(host, node_hosts, leader_host)
         self.ack_buffer = {}
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
@@ -19,7 +19,7 @@ class Follower(Node):
     def write(self, key, value, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
-        msg_id = f"{self.port}:{self.write_id}"
+        msg_id = "{}:{}".format(self.host, self.write_id)
         self.ack_buffer[msg_id] = PendingElement(key, value, msg_id, addr)
         self.write_id += 1
 
@@ -28,7 +28,7 @@ class Follower(Node):
             "id": msg_id,
             "key": key,
             "value": value,
-            "from": self.port,
+            "from": self.host,
         }
 
         self.send_to_all(data)
@@ -55,7 +55,7 @@ class Follower(Node):
                 del self.write_buffer[write_order["id"]]
                 self.order_buffer.remove(write_order)
 
-                logging.debug(f"{self}: saved {key} = {value} of message: {write_order['id']}")
+                logging.debug("{}: saved {} = {} of message: {}".format(self, key, value, write_order['id']))
                 self.data[key] = (value, self.order_index)
                 self.order_index += 1
 
@@ -105,7 +105,7 @@ class Follower(Node):
         data = {
             "type": "acknowledge",
             "id": data["id"],
-            "from": self.port,
+            "from": self.host,
         }
 
         self.send(addr, data)
@@ -125,7 +125,7 @@ class Follower(Node):
         self.ack_buffer[msg_id].acknowledge(addr)
 
         if self.ack_buffer[msg_id].is_complete(len(self.node_hosts)):
-            logging.debug(f"{self}: received all acknowledgements for message: {msg_id}")
+            logging.debug("{}: received all acknowledgements for message: {}".format(self, msg_id))
             pending_element = self.ack_buffer[msg_id]
             self.write_buffer[msg_id] = (pending_element.key, pending_element.value, pending_element.client_addr)
             del self.ack_buffer[msg_id]
@@ -147,7 +147,7 @@ class Follower(Node):
 
     def on_message(self, addr, data):
         if data["type"] == "exit":
-            logging.debug(f"{self}: received exit message from {addr}")
+            logging.debug("{}: received exit message from {}".format(self, addr))
             self.is_connected = False
             self.socket.close()
             # sys.exit()
@@ -163,4 +163,4 @@ class Follower(Node):
             self.handle_acknowledge(addr, data)
 
     def __str__(self) -> str:
-        return f"Follower:{self.port}"
+        return "Follower:{}".format(self.host)
