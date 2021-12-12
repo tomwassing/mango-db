@@ -45,7 +45,7 @@ class System:
             thread.start()
 
     def _make_clients(self):
-        self.clients = [Client(self.node_hosts) for _ in range(self.num_clients)]
+        self.clients = [Client(self.node_hosts[1:]) for _ in range(self.num_clients)]
 
 class DasSystem(System):
 
