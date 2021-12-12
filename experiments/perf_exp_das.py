@@ -17,15 +17,18 @@ def main():
     hostnames = os.getenv('HOSTS').split()
     hostname = socket.gethostname()
 
+    system = DasSystem(num_clients=1, port=25000)
     if hostname != hostnames[0]:
+        system.start()
         return
 
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
-        systems=[DasSystem(num_clients=1, port=25000)],
+        systems=[system],
         n_writes=100000,
         n_reads=100000,
     )
+
 
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
