@@ -1,4 +1,9 @@
-import sys 
+import sys
+import os
+import logging
+import socket
+import time
+
 sys.path.append('..')
 from leader import Leader
 from follower import Follower
@@ -40,3 +45,32 @@ class System:
 
     def _make_clients(self):
         self.clients = [Client(self.ports) for _ in range(self.num_clients)]
+
+class DasSystem(System):
+
+    def __init__(self, num_clients, port, order_on_write=False):
+        self.hostname = socket.gethostname()
+        self.hostnames = os.getenv('HOSTS').split()
+
+        super().__init__('DAS', len(self.hostnames) - 1, num_clients, port, order_on_write)
+
+    
+    def _startup_nodes(self):
+        host = (self.hostname, self.port)
+        is_client = self.hostname == self. hostnames[0]
+        is_leader = self.hostname == self.hostnames[-1]
+
+        logging.info('Starting experiment system on {}'.format(self.hostname))
+        logging.info("Found {} hosts: {}".format(len(self.hostnames), self.hostnames))
+
+        host = (self.hostname, self.ports[0])
+        if is_leader:
+            leader = Leader(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], host)
+            leader.run() 
+        elif not is_client:
+            follower = Follower(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], (self.hostnames[-1], self.port))
+            follower.run()
+
+    def shutdown(self):
+        for client in self.clients: 
+            client.exit()
