@@ -37,8 +37,6 @@ class System:
         for thread in self.threads: thread.join()
 
     def _startup_nodes(self):
-        
-
         self.followers = [Follower(("127.0.0.1", port), [h for h in self.node_hosts if h[1] != port], self.node_hosts[-1]) for port in self.ports[:-1]]
         self.leader = Leader(self.node_hosts[-1], self.node_hosts[:-1], self.node_hosts[-1])
         self.threads = [Thread(target=node.run) for node in [self.leader, *self.followers]]
@@ -57,6 +55,8 @@ class DasSystem(System):
         self.port = port
 
         super().__init__('DAS', len(self.hostnames) - 1, num_clients, port, order_on_write)
+        self.node_hosts = list(zip(self.hostnames, self.ports))
+
 
     
     def _startup_nodes(self):
