@@ -22,6 +22,10 @@ def main(port=25000):
 
     hostnames = os.getenv('HOSTS').split()
     hostname = os.getenv('HOSTNAME')
+
+    logging.info('Starting server on {}'.format(hostname))
+    logging.info("Found {} hosts: {}".format(len(hostnames), hostnames))
+
     host = (hostname, port)
 
     is_client = hostname == hostnames[0]
