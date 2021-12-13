@@ -19,7 +19,7 @@ def main(order_on_write, read_heavy):
     hostnames = os.getenv('HOSTS').split()
     hostname = socket.gethostname()
 
-    system = DasSystem(num_clients=1, port=25000, order_on_write=order_on_write)
+    system = DasSystem(num_clients=10, port=25000, order_on_write=order_on_write)
     if hostname != hostnames[0]:
         system.start()
         return
@@ -40,7 +40,7 @@ def main(order_on_write, read_heavy):
 
     exp_func = perf_exp_2.read_heave_exp_func if read_heavy else perf_exp_2.write_heavy_exp_func
 
-    results = list(experiment.run(exp_func, repeat=1))
+    results = list(experiment.run_multi_client(exp_func, repeat=1))
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
     filename = "./results/experiment_{}_{}_{}.csv".format(order_on_write, read_heavy, datetime.today().strftime("%Y%m%d%H%M%S"))
 
