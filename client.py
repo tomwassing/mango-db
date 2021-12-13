@@ -56,6 +56,9 @@ class Client:
         return json.loads(data.decode())
 
     def read(self, key, host=None):
+        if not isinstance(key, list):
+            key = [key]
+
         data = {
             "type": "client_read",
             "key": key,
