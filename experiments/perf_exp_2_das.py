@@ -29,8 +29,8 @@ def main(order_on_write, read_heavy):
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
         systems=[system],
-        n_writes=100000,
-        n_reads=100000,
+        n_writes=1000,
+        n_reads=1000,
     )
 
     # Run experiment 5 times
@@ -40,7 +40,7 @@ def main(order_on_write, read_heavy):
 
     exp_func = perf_exp_2.read_heave_exp_func if read_heavy else perf_exp_2.write_heavy_exp_func
 
-    results = list(experiment.run_multi_client(exp_func, repeat=1))
+    results = list(experiment.run_multi_client(exp_func, repeat=1))[0]
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
     filename = "./results/experiment_{}_{}_{}.csv".format(order_on_write, read_heavy, datetime.today().strftime("%Y%m%d%H%M%S"))
 
