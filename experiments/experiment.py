@@ -1,4 +1,5 @@
 import random
+from threading import Thread
 from time import perf_counter
 import numpy as np
 
@@ -49,6 +50,33 @@ class Experiment:
             for result in self._run(experiment_func, repeat):
                 yield result
             self._current_system = None
+
+        print("Experiment completed\n\n")
+
+    def run_multi_client(self, experiment_func, repeat=1):
+        print("Start experiment")
+
+        self.n_reads = self.n_reads // self._current_system.num_clients
+        self.n_writes = self.n_writes // self._current_system.num_clients
+
+        client_resuts = [0]*self._current_system.num_clients
+
+        def client_run(i):
+            client_resuts[i] = self._run(experiment_func, repeat)
+
+        for system in self.systems:
+            threads = [Thread(target=client_run, args=(i,)) for i in range(system.num_clients)]
+
+            self._current_system = system
+            for thread in threads:
+                thread.start()
+
+            for thread in threads:
+                thread.join()
+
+            self._current_system = None
+
+            yield list(sum(client_resuts, []))
 
         print("Experiment completed\n\n")
 
