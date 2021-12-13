@@ -63,7 +63,7 @@ class Experiment:
         client_resuts = [0]*self._current_system.num_clients
 
         def client_run(i):
-            client_resuts[i] = self._run(experiment_func, repeat)
+            client_resuts[i] = list(self._run(experiment_func, repeat))
 
         for system in self.systems:
             threads = [Thread(target=client_run, args=(i,)) for i in range(system.num_clients)]
