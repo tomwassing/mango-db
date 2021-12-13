@@ -6,7 +6,7 @@ from experiment import Experiment
 from system import System
 
 
-def experiment_func():
+def experiment_func(experiment):
 
     # Alternate the reads and writes
     experiment.reset()

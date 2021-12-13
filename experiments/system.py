@@ -61,7 +61,7 @@ class DasSystem(System):
     
     def _startup_nodes(self):
         host = (self.hostname, self.port)
-        is_client = self.hostname == self. hostnames[0]
+        is_client = self.hostname == self.hostnames[0]
         is_leader = self.hostname == self.hostnames[-1]
 
         logging.info('Starting experiment system on {}'.format(self.hostname))
