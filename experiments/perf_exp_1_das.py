@@ -37,7 +37,7 @@ def main(order_on_write):
     print("{}".format(experiment.__str__()))
     start = time.perf_counter()
 
-    results = list(experiment.run(perf_exp_1.experiment_func, repeat=1))
+    results = list(experiment.run(perf_exp_1.experiment_func, repeat=1))[0]
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
     filename = "./results/experiment_{}_{}.csv".format(order_on_write, datetime.today().strftime("%Y%m%d%H%M%S"))
 
