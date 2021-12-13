@@ -4,6 +4,7 @@ import os
 import csv
 import logging
 import time
+import sys
 
 from experiment import Experiment
 from system import DasSystem
@@ -11,18 +12,19 @@ from system import DasSystem
 
 import perf_exp_2
 
-def main():
+def main(order_on_write, read_heavy):
     logging.basicConfig(format='%(asctime)s.%(msecs)03d - %(levelname)-8s: %(message)s',
                         level=logging.WARNING,datefmt='%d-%m-%y %H:%M:%S')
+    
     hostnames = os.getenv('HOSTS').split()
     hostname = socket.gethostname()
 
-    system = DasSystem(num_clients=1, port=25000)
+    system = DasSystem(num_clients=1, port=25000, order_on_write=order_on_write)
     if hostname != hostnames[0]:
         system.start()
         return
 
-    time.sleep(10)
+    time.sleep(15)
 
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
@@ -31,14 +33,16 @@ def main():
         n_reads=100000,
     )
 
-
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
     start = time.perf_counter()
 
-    results = list(experiment.run(perf_exp_2.read_heave_exp_func, repeat=1))
+
+    exp_func = perf_exp_2.read_heave_exp_func if read_heavy else perf_exp_2.write_heavy_exp_func
+
+    results = list(experiment.run(exp_func, repeat=1))
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
-    filename = "./results/experiment1_{}.csv".format(datetime.today().strftime("%Y%m%d%H%M%S"))
+    filename = "./results/experiment_{}_{}_{}.csv".format(order_on_write, read_heavy, datetime.today().strftime("%Y%m%d%H%M%S"))
 
     with open(filename, 'w', encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -50,4 +54,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    order_on_write = len(sys.argv) > 1 and bool(sys.argv[1])
+    read_heavy = len(sys.argv) > 2 and bool(sys.argv[2])
+    main(order_on_write, read_heavy)
