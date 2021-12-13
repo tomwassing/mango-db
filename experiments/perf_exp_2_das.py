@@ -29,14 +29,13 @@ def main(order_on_write, read_heavy):
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
         systems=[system],
-        n_writes=1000,
-        n_reads=1000,
+        n_writes=100000,
+        n_reads=100000,
     )
 
     # Run experiment 5 times
     print("{}".format(experiment.__str__()))
     start = time.perf_counter()
-
 
     exp_func = perf_exp_2.read_heave_exp_func if read_heavy else perf_exp_2.write_heavy_exp_func
 

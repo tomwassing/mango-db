@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # cores
-for n in 4; do
+for n in 5, 7, 9; do
 
     # runs
     for i in {1..10}; do
