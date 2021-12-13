@@ -1,6 +1,7 @@
 from collections import defaultdict
 from data import PendingElement
 from node import Node
+from readtransaction import ReadTransaction
 import logging
 import sys
 class Follower(Node):
@@ -70,34 +71,28 @@ class Follower(Node):
             else:
                 break
 
-        for key, clients in list(self.read_buffer.items()):
+        for key, transactions in list(self.read_buffer.items()):
             if self.is_key_pending(key):
                 continue
 
-            for client in clients:
-                data = {
-                    "type": "read_result",
-                    "key": key,
-                    "value": self.data[key][0],
-                    "order_index": self.data[key][1]
-                }
+            for t in transactions:
+                is_final = t.add_pair(key, self.data[key][0], self.data[key][1], True)
+                if is_final:
+                    self.send(t.addr, t.return_data())
 
-                self.send(client, data)
             del self.read_buffer[key]
 
     def handle_client_read(self, addr, data):
-        key = data["key"]
-        if self.is_key_pending(key):
-            self.read_buffer[key].append(addr)
-        else:
-            data = {
-                "type": "read_result",
-                "key": key,
-                "value": self.data[key][0],
-                "order_index": self.data[key][1]
-            }
-
-            self.send(addr, data)
+        rt = ReadTransaction(addr)
+        keys = data["key"]
+        for key in keys:
+            if self.is_key_pending(key):
+                rt.add_pending(key)
+                self.read_buffer[key].append(rt)
+            else:
+                rt.add_pair(key, self.data[key][0], self.data[key][1])
+        if not rt.n_pending:
+            self.send(addr, rt.return_data())
 
     def handle_client_write(self, addr, data):
         self.write(data["keys"], data["values"], addr)

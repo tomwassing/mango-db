@@ -68,6 +68,20 @@ class TestSimpleTest:
         assert read_value == 'Hello5?' and order_index == 4
 
     @pytest.mark.parametrize('execution_number', range(10))
+    def test_multiple_reads(self, execution_number):
+        client = self.clients[0]
+        client2 = self.clients[1]
+        client.write("World1!", 'Hello1?')
+        client2.write("World2!", 'Hello2?')
+        client.write("World3!", 'Hello3?')
+        client2.write("World4!", 'Hello4?')
+        client.write("World5!", 'Hello5?')
+
+        read_value = client.read(["World1!", "World2!", "World3!","World4!", "World5!"])["value"]
+        order_index = client.read(["World1!", "World2!", "World3!","World4!", "World5!"])["order_index"]
+        assert read_value == ['Hello1?', 'Hello2?', 'Hello3?', 'Hello4?','Hello5?'] and order_index == [0,1,2,3,4]
+
+    @pytest.mark.parametrize('execution_number', range(10))
     def test_multi_sync(self, execution_number):
         client = self.clients[0]
         for i in range(100):
