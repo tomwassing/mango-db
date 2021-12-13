@@ -80,15 +80,6 @@ class Follower(Node):
                 if is_final:
                     self.send(t.addr, t.return_data())
 
-            # for client in clients:
-            #     data = {
-            #         "type": "read_result",
-            #         "key": key,
-            #         "value": self.data[key][0],
-            #         "order_index": self.data[key][1]
-            #     }
-            #
-            #     self.send(client, data)
             del self.read_buffer[key]
 
     def handle_client_read(self, addr, data):
