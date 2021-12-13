@@ -28,7 +28,7 @@ class Experiment:
             self.experiment_name, self.n_reads, self.n_writes
         )
 
-    def _run(self, experiment_func, repeat):
+    def _run(self, experiment_func, repeat, client_idx=None):
         for run_id in range(repeat):
             print('run: {}'.format(run_id))
             self._current_system.start()
@@ -63,7 +63,7 @@ class Experiment:
         client_resuts = [[]]*self._current_system.num_clients
 
         def client_run(i):
-            client_resuts[i] = list(self._run(experiment_func, repeat))
+            client_resuts[i] = list(self._run(experiment_func, repeat, client_idx=i))
 
         for system in self.systems:
             threads = [Thread(target=client_run, args=(i,)) for i in range(system.num_clients)]

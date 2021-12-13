@@ -6,7 +6,7 @@ from experiment import Experiment
 from system import System
 
 
-def experiment_func(experiment):
+def experiment_func(experiment, client_idx=0):
 
     # Alternate the reads and writes
     experiment.reset()
@@ -16,14 +16,14 @@ def experiment_func(experiment):
         latency, operation, on_leader = None, None, None
 
         if remaining_writes == 0:
-            latency, on_leader = experiment.client_read(client_idx=0)
+            latency, on_leader = experiment.client_read(client_idx=client_idx)
             operation = 'read'
             remaining_reads -= 1
             yield latency, operation, on_leader
             continue
 
         if remaining_reads == 0:
-            latency, on_leader = experiment.client_write(client_idx=0)
+            latency, on_leader = experiment.client_write(client_idx=client_idx)
             operation = 'write'
             remaining_writes -= 1
             yield latency, operation, on_leader
@@ -32,11 +32,11 @@ def experiment_func(experiment):
         read = True if random.random() <= 0.5 else False
 
         if read and remaining_writes < experiment.n_writes:
-            latency, on_leader = experiment.client_read(client_idx=0)
+            latency, on_leader = experiment.client_read(client_idx=client_idx)
             operation = 'read'
             remaining_reads -= 1
         else:
-            latency, on_leader = experiment.client_write(client_idx=0)
+            latency, on_leader = experiment.client_write(client_idx=client_idx)
             operation = 'write'
             remaining_writes -= 1
 
