@@ -56,6 +56,7 @@ class Experiment:
     def run_multi_client(self, experiment_func, repeat=1):
         print("Start experiment")
 
+        self._current_system = self.systems[0]
         self.n_reads = self.n_reads // self._current_system.num_clients
         self.n_writes = self.n_writes // self._current_system.num_clients
 
@@ -67,7 +68,6 @@ class Experiment:
         for system in self.systems:
             threads = [Thread(target=client_run, args=(i,)) for i in range(system.num_clients)]
 
-            self._current_system = system
             for thread in threads:
                 thread.start()
 
