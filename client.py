@@ -34,11 +34,13 @@ class Client:
         for host in self.node_hosts:
             self.socket.sendto(json.dumps(data).encode(), host)
 
-    def write(self, key, value, host=None, blocking=True):
+    def write(self, keys, values, host=None, blocking=True):
+        keys = keys if type(keys) == tuple else (keys,)
+        values = values if type(values) == tuple else (values,)
         data = {
             "type": "client_write",
-            "key": key,
-            "value": value
+            "keys": keys,
+            "values": values
         }
 
         if blocking:

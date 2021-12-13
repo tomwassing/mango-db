@@ -1,5 +1,5 @@
 import random
-from time import perf_counter_ns, time, time_ns
+from time import perf_counter
 import numpy as np
 
 
@@ -65,24 +65,24 @@ class Experiment:
     def client_write(self, client_idx):
         key, value = self._get_key_value_pair()
 
-        start = perf_counter_ns()
-        node_port = self._current_system.clients[client_idx].write(key, value)
-        end = perf_counter_ns()
+        start = perf_counter()
+        node_host = self._current_system.clients[client_idx].write(key, value)
+        end = perf_counter()
 
         latency = end-start
-        write_on_leader = self._is_leader(node_port)
+        write_on_leader = self._is_leader(node_host)
         return latency, write_on_leader
 
     def client_read(self, client_idx):
         key = random.choice(self._used_keys)
 
-        start = perf_counter_ns()
-        node_port = self._current_system.clients[client_idx].read(key)['port']
-        end = perf_counter_ns()
+        start = perf_counter()
+        node_host = self._current_system.clients[client_idx].read(key)['host']
+        end = perf_counter()
 
         latency = end - start
-        read_on_leader = self._is_leader(node_port)
+        read_on_leader = self._is_leader(node_host)
         return latency, read_on_leader
 
-    def _is_leader(self, port):
-        return self._current_system.ports[-1] == port
+    def _is_leader(self, host):
+        return self._current_system.node_hosts[-1] == host
