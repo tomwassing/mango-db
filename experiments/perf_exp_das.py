@@ -54,6 +54,6 @@ def main(order_on_write, read_heavy):
 
 
 if __name__ == '__main__':
-    order_on_write = len(sys.argv) > 1 and bool(sys.argv[1])
-    read_heavy = len(sys.argv) > 2 and bool(sys.argv[2])
+    order_on_write = len(sys.argv) > 1 and int(sys.argv[1]) == 1
+    read_heavy = len(sys.argv) > 2 and int(sys.argv[2]) == 1
     main(order_on_write, read_heavy)
