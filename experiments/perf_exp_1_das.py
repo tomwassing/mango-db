@@ -29,8 +29,8 @@ def main(order_on_write):
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
         systems=[system],
-        n_writes=100000,
-        n_reads=100000,
+        n_writes=1000,
+        n_reads=1000,
     )
 
     # Run experiment 5 times
