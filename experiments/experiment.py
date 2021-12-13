@@ -60,7 +60,7 @@ class Experiment:
         self.n_reads = self.n_reads // self._current_system.num_clients
         self.n_writes = self.n_writes // self._current_system.num_clients
 
-        client_resuts = [0]*self._current_system.num_clients
+        client_resuts = [[]]*self._current_system.num_clients
 
         def client_run(i):
             client_resuts[i] = list(self._run(experiment_func, repeat))
