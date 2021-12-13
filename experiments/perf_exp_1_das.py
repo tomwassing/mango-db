@@ -29,8 +29,8 @@ def main(order_on_write):
     experiment = Experiment(
         experiment_name='Performance Experiment 1',
         systems=[system],
-        n_writes=1000,
-        n_reads=1000,
+        n_writes=100000,
+        n_reads=100000,
     )
 
     # Run experiment 5 times
@@ -39,7 +39,7 @@ def main(order_on_write):
 
     results = list(experiment.run(perf_exp_1.experiment_func, repeat=1))
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
-    filename = "./results/experiment_{}_{}.csv".format(order_on_write, datetime.today().strftime("%Y%m%d%H%M%S"))
+    filename = "./results/experiment1_{}_{}.csv".format(order_on_write, datetime.today().strftime("%Y%m%d%H%M%S"))
 
     with open(filename, 'w', encoding="utf-8") as f:
         writer = csv.writer(f)

@@ -26,11 +26,14 @@ def main(order_on_write, read_heavy):
 
     time.sleep(15)
 
+    read_factor = 2 if read_heavy else 1
+    write_factor = 1 if read_heavy else 2
+
     experiment = Experiment(
-        experiment_name='Performance Experiment 1',
+        experiment_name='Performance Experiment 2',
         systems=[system],
-        n_writes=100000,
-        n_reads=100000,
+        n_writes=100000 * write_factor,
+        n_reads=100000 * read_factor,
     )
 
     # Run experiment 5 times
@@ -41,7 +44,7 @@ def main(order_on_write, read_heavy):
 
     results = list(experiment.run_multi_client(exp_func, repeat=1))[0]
     columns = ["system_name", "run_id", "latency", "operation", "on_leader", "n_nodes", "n_clients", "order_on_write"]
-    filename = "./results/experiment_{}_{}_{}.csv".format(order_on_write, read_heavy, datetime.today().strftime("%Y%m%d%H%M%S"))
+    filename = "./results/experiment2_{}_{}_{}.csv".format(order_on_write, read_heavy, datetime.today().strftime("%Y%m%d%H%M%S"))
 
     with open(filename, 'w', encoding="utf-8") as f:
         writer = csv.writer(f)
