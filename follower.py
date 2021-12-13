@@ -11,7 +11,7 @@ class Follower(Node):
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
         self.write_id = 0
-        self.data = {}
+        self.data = defaultdict(lambda: (None, None))
         self.order_index = 0
         self.order_buffer = []
         self.leader_host = leader_host

@@ -99,6 +99,8 @@ class TestSimpleTest:
 
         assert read_client.read('World!')["value"] == 'Hello'
 
+    def test_wri
+
 class TestDurability:
 
     def setup_method(self, method):
