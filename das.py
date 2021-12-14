@@ -1,12 +1,11 @@
 import os
 import socket
-from client import Client
-from follower import Follower
 import signal
 import logging
-from threading import Thread
 import time
-
+from threading import Thread
+from client import Client
+from follower import Follower
 from leader import Leader
 
 '''

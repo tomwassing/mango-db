@@ -1,3 +1,10 @@
+"""
+readtransaction.py
+
+Description:
+    TODO
+"""
+
 class ReadTransaction():
     def __init__(self, addr):
         self.n_keys = 0

@@ -7,7 +7,6 @@ from client import Client
 
 
 def setup(num_nodes, num_clients, start_port=25000, delayed=False):
-
     node_ports = list(range(start_port, start_port + num_nodes))
     node_hosts = [("127.0.0.1", port) for port in node_ports]
     nodes = [Follower(("127.0.0.1", port), [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
@@ -46,7 +45,7 @@ class TestSimpleTest:
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write(self, execution_number):
         client = self.clients[0]
-        client.write(("World!", "keyTest"), ('Hello?', "valueTest"))
+        client.write(["World!", "keyTest"], ['Hello?', "valueTest"])
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
 
@@ -99,10 +98,8 @@ class TestSimpleTest:
 
         assert read_client.read('World!')["value"] == 'Hello'
 
-    def test_wri
 
 class TestDurability:
-
     def setup_method(self, method):
         node_hosts, nodes, leader, clients, threads = setup(5, 2)
         self.node_hosts = node_hosts
@@ -160,8 +157,8 @@ class TestDurability:
 
         assert len(set(values)) == 1
 
-class TestConsistency:
 
+class TestConsistency:
     def setup_method(self, method):
         node_hosts, nodes, leader, clients, threads = setup(5, 4)
         self.node_hosts = node_hosts
@@ -220,7 +217,6 @@ class TestConsistency:
 
 
 class TestConsistency_delay:
-
     def setup_method(self, method):
         node_hosts, nodes, leader, clients, threads = setup(5, 4, delayed=True)
         self.node_hosts = node_hosts
@@ -234,7 +230,6 @@ class TestConsistency_delay:
             client.exit()
         for thread in self.threads:
             thread.join()
-
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_out_of_order(self, execution_number):
