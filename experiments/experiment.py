@@ -92,28 +92,34 @@ class Experiment:
         return key, value
 
     def client_write(self, client_idx):
-        key, value = self._get_key_value_pair()
+            try:
+                key, value = self._get_key_value_pair()
+                
+                start = perf_counter()
+                node_host = self._current_system.clients[client_idx].write(key, value)
+                end = perf_counter()
 
-
-        
-        start = perf_counter()
-        node_host = self._current_system.clients[client_idx].write(key, value)
-        end = perf_counter()
-
-        latency = end-start
-        write_on_leader = self._is_leader(node_host)
-        return latency, write_on_leader
+                latency = end-start
+                write_on_leader = self._is_leader(node_host)
+                return latency, write_on_leader
+            except Exception as e:
+                print(e)
+                return None, self._is_leader(node_host)
 
     def client_read(self, client_idx):
-        key = random.choice(self._used_keys)
+        try:
+            key = random.choice(self._used_keys)
 
-        start = perf_counter()
-        node_host = self._current_system.clients[client_idx].read(key)['host']
-        end = perf_counter()
+            start = perf_counter()
+            node_host = self._current_system.clients[client_idx].read(key)['host']
+            end = perf_counter()
 
-        latency = end - start
-        read_on_leader = self._is_leader(node_host)
-        return latency, read_on_leader
+            latency = end - start
+            read_on_leader = self._is_leader(node_host)
+            return latency, read_on_leader
+        except Exception as e:
+            print(e)
+            return None, self._is_leader(node_host)
 
     def _is_leader(self, host):
         return self._current_system.node_hosts[-1] == host

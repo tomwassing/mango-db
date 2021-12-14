@@ -17,6 +17,8 @@ import sys
 
 
 class Follower(Node):
+    """
+    """
     def __init__(self, host, node_hosts, leader_host, order_on_write=False):
         super().__init__(host, node_hosts, leader_host)
         self.ack_buffer = {}
