@@ -32,8 +32,8 @@ def main(order_on_write, read_heavy):
     experiment = Experiment(
         experiment_name='Performance Experiment 2',
         systems=[system],
-        n_writes=10000 * write_factor,
-        n_reads=10000 * read_factor,
+        n_writes=100000 * write_factor,
+        n_reads=100000 * read_factor,
     )
 
     # Run experiment 5 times
