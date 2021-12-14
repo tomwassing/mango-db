@@ -32,6 +32,8 @@ class Experiment:
         for run_id in range(repeat):
             print('run: {}'.format(run_id))
             self._current_system.start()
+            results = 
+
             for latency, operation, on_leader in experiment_func(self):
                 system_name = self._current_system.name
                 n_nodes = self._current_system.num_nodes
@@ -93,6 +95,8 @@ class Experiment:
     def client_write(self, client_idx):
         key, value = self._get_key_value_pair()
 
+
+        
         start = perf_counter()
         node_host = self._current_system.clients[client_idx].write(key, value)
         end = perf_counter()
