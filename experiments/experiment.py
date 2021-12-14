@@ -32,7 +32,6 @@ class Experiment:
         for run_id in range(repeat):
             print('run: {}'.format(run_id))
             self._current_system.start()
-            results = 
 
             for latency, operation, on_leader in experiment_func(self):
                 system_name = self._current_system.name
