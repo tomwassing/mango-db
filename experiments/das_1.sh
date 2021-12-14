@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # cores
-for n in 3 5 9; do
+for n in 5 9 3; do
 
     # runs
-    for i in {1..10}; do
+    for i in {1..5}; do
         # order_on_write or order_on_read 
         for k in 0 1; do
             echo "run $i, order_on_write $k, nodes $n"
