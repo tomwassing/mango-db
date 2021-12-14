@@ -1,3 +1,12 @@
+"""
+leader.py
+
+Description:
+    Contains definitions for the leader node, which inherits from the follower
+    class in follower.py.
+    
+"""
+
 import logging
 from follower import Follower
 

@@ -1,9 +1,21 @@
+"""
+follower.py
+
+Description:
+    Contains definitions for the follower node, which inherits from the node
+    class defined in the file in node.py.
+    It overloads the hande_messages function from the parent class and contains
+    function for handeling read and write operations.
+"""
+
 from collections import defaultdict
 from data import PendingElement
 from node import Node
 from readtransaction import ReadTransaction
 import logging
 import sys
+
+
 class Follower(Node):
     def __init__(self, host, node_hosts, leader_host, order_on_write=False):
         super().__init__(host, node_hosts, leader_host)
@@ -19,7 +31,7 @@ class Follower(Node):
 
         logging.info("{}: constructed with hosts: {}".format(self, node_hosts))
 
-
+    # Handles initial part of write operation by client
     def write(self, keys, values, addr):
         '''Add key-value pair to acknowledge buffer and send write message to
         all the other nodes.'''
@@ -27,6 +39,7 @@ class Follower(Node):
         self.ack_buffer[msg_id] = PendingElement(keys, values, msg_id, addr)
         self.write_id += 1
 
+        # Send the write to all other nodes
         data = {
             "type": "write",
             "id": msg_id,
@@ -38,6 +51,7 @@ class Follower(Node):
         self.send_to_all(data)
         return msg_id
 
+    # Checks whether there is a pending write for a given key
     def is_key_pending(self, key):
         for value in self.ack_buffer.values():
             for k in value.keys:
@@ -51,9 +65,11 @@ class Follower(Node):
 
         return False
 
+    # This function takes care of ordering write in the buffer as assigned by the leader
     def handle_write_order(self, addr, data):
         self.order_buffer.append(data)
 
+        # Goes over all the key-value pairs in the write buffer
         for write_order in list(sorted(self.order_buffer, key=lambda x: x["index"])):
             if write_order["index"] == self.order_index:
                 keys, values, client_addr = self.write_buffer[write_order["id"]]
@@ -61,16 +77,18 @@ class Follower(Node):
                 self.order_buffer.remove(write_order)
 
                 logging.debug("{}: saved {} = {} of message: {}".format(self, keys, values, write_order['id']))
+
+                # Stores all key-value pairs seperatly in case of multiple write
                 for i in range(len(keys)):
                     self.data[keys[i]] = (values[i], self.order_index)
                 self.order_index += 1
-
+                
                 if self.order_on_write and client_addr:
                     self.send_write_result(client_addr, keys, values)
 
             else:
                 break
-
+        
         for key, transactions in list(self.read_buffer.items()):
             if self.is_key_pending(key):
                 continue
@@ -82,26 +100,32 @@ class Follower(Node):
 
             del self.read_buffer[key]
 
+    # Returns the value of a key to the client
     def handle_client_read(self, addr, data):
         rt = ReadTransaction(addr)
         keys = data["key"]
+
+        # Goes over all keys to check whether they have pending writes
         for key in keys:
             if self.is_key_pending(key):
                 rt.add_pending(key)
                 self.read_buffer[key].append(rt)
             else:
                 rt.add_pair(key, self.data[key][0], self.data[key][1])
+
         if not rt.n_pending:
             self.send(addr, rt.return_data())
 
+    # Client write helper function
     def handle_client_write(self, addr, data):
         self.write(data["keys"], data["values"], addr)
 
+    # Handles a write message from another node in the system
     def handle_write(self, addr, data):
-        # Handling incoming write message from other nodes. Ack the message and
-        # add to own write buffer.
+        # Add to own write buffer
         self.write_buffer[data["id"]] = (data["keys"], data["values"], None)
 
+        # Send acknowledge back
         data = {
             "type": "acknowledge",
             "id": data["id"],
@@ -110,6 +134,7 @@ class Follower(Node):
 
         self.send(addr, data)
 
+    # Sends write ack to client once all nodes have acknowledged the write
     def send_client_write_ack(self, msg_id):
         data = {
             "type": "client_write_ack",
@@ -118,12 +143,13 @@ class Follower(Node):
 
         self.send(self.leader_host, data)
 
+
+    # Hadnles ack messages from other nodes
     def handle_acknowledge(self, addr, data):
-        # Receiving ack message from other nodes, finalize if all ack messages
-        # have been received
         msg_id = data["id"]
         self.ack_buffer[msg_id].acknowledge(addr)
 
+        # Once all nodes have acknowledged the write it is moved to the write buffer
         if self.ack_buffer[msg_id].is_complete(len(self.node_hosts)):
             logging.debug("{}: received all acknowledgements for message: {}".format(self, msg_id))
             pending_element = self.ack_buffer[msg_id]
@@ -135,8 +161,8 @@ class Follower(Node):
                     pending_element.keys, pending_element.values)
             self.send_client_write_ack(msg_id)
 
+    # Send the result of the write back to the client
     def send_write_result(self, client_addr, key, value):
-        # print("send_write_result", client_addr, key, value)
         data = {
             "type": "write_result",
             "key": key,
@@ -145,12 +171,12 @@ class Follower(Node):
 
         self.send(client_addr, data)
 
+    # Handles incomming messages and calls the appropriare function for each message
     def on_message(self, addr, data):
         if data["type"] == "exit":
             logging.debug("{}: received exit message from {}".format(self, addr))
             self.is_connected = False
             self.socket.close()
-            # sys.exit()
         elif data["type"] == "write_order":
             self.handle_write_order(addr, data)
         elif data["type"] == "client_read":
@@ -162,5 +188,6 @@ class Follower(Node):
         elif data["type"] == "acknowledge":
             self.handle_acknowledge(addr, data)
 
+    # Allows you to print info about follower node as a string
     def __str__(self) -> str:
         return "Follower:{}:{}".format(self.host[0], self.host[1])

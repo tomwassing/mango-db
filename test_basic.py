@@ -46,7 +46,7 @@ class TestSimpleTest:
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write(self, execution_number):
         client = self.clients[0]
-        client.write(("World!", "keyTest"), ('Hello?', "valueTest"))
+        client.write(["World!", "keyTest"], ['Hello?', "valueTest"])
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
 
@@ -98,8 +98,6 @@ class TestSimpleTest:
         write_client.write("World!", 'Hello')
 
         assert read_client.read('World!')["value"] == 'Hello'
-
-    def test_wri
 
 class TestDurability:
 
