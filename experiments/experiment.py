@@ -104,7 +104,7 @@ class Experiment:
                 return latency, write_on_leader
             except Exception as e:
                 print(e)
-                return None, self._is_leader(node_host)
+                return None, False
 
     def client_read(self, client_idx):
         try:
@@ -119,7 +119,7 @@ class Experiment:
             return latency, read_on_leader
         except Exception as e:
             print(e)
-            return None, self._is_leader(node_host)
+            return None, False
 
     def _is_leader(self, host):
         return self._current_system.node_hosts[-1] == host
