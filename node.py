@@ -4,7 +4,7 @@ node.py
 Description:
     This file contains the definition of the node class.
     It provides the basic functionality for each node in the system.
-    This functionality includes running receiving messages, handeling messages and
+    This functionality includes receiving messages, handeling messages and
     sending messages.
 """
 
@@ -38,16 +38,16 @@ class Node:
             logging.debug("{}, received message: {} from {}".format(self, message, addr))
             self.on_message(addr, message)
 
-    # The same as run, only with a artificual delay for testing
+    # The same as run, only with a artificial delay for testing
     def run_delayed(self):
         while self.is_connected:
-            time.sleep(.05)
+            time.sleep(.05) # Artificial delay
             data, addr = self.socket.recvfrom(1024)
             message = json.loads(data.decode())
             logging.debug("{}, received message: {} from {}".format(self, message, addr))
             self.on_message(addr, message)
 
-    # Sends 'data' to all other known hosts
+    # Sends 'data' to all other known hosts by looping over them
     def send_to_all(self, data):
         for host in self.node_hosts:
             self.send(host, data)

@@ -22,10 +22,11 @@ class Follower(Node):
         self.ack_buffer = {}
         self.write_buffer = {}
         self.read_buffer = defaultdict(list)
+        self.order_buffer = []
+
         self.write_id = 0
         self.data = defaultdict(lambda: (None, None))
         self.order_index = 0
-        self.order_buffer = []
         self.leader_host = leader_host
         self.order_on_write = order_on_write
 
@@ -107,12 +108,16 @@ class Follower(Node):
 
         # Goes over all keys to check whether they have pending writes
         for key in keys:
+            # If the key has a pending write it is added to the 
+            # pending key list and the read buffer
             if self.is_key_pending(key):
                 rt.add_pending(key)
                 self.read_buffer[key].append(rt)
+            # Else the key-value pair is simply stored for later
             else:
                 rt.add_pair(key, self.data[key][0], self.data[key][1])
 
+        # If no writes are pending the values are send to the client
         if not rt.n_pending:
             self.send(addr, rt.return_data())
 
@@ -143,8 +148,7 @@ class Follower(Node):
 
         self.send(self.leader_host, data)
 
-
-    # Hadnles ack messages from other nodes
+    # Handles ack messages from other nodes
     def handle_acknowledge(self, addr, data):
         msg_id = data["id"]
         self.ack_buffer[msg_id].acknowledge(addr)
