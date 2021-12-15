@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # cores
-for n in 3 5 9; do
+for n in 5 9 3; do
 
     # runs
-    for i in {1..10}; do
+    for i in {1..5}; do
 
         # read_heavy or write_heavy
         for j in 0 1; do

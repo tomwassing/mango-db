@@ -37,8 +37,8 @@ class System:
         for thread in self.threads: thread.join()
 
     def _startup_nodes(self):
-        self.followers = [Follower(("127.0.0.1", port), [h for h in self.node_hosts if h[1] != port], self.node_hosts[-1]) for port in self.ports[:-1]]
-        self.leader = Leader(self.node_hosts[-1], self.node_hosts[:-1], self.node_hosts[-1])
+        self.followers = [Follower(("127.0.0.1", port), [h for h in self.node_hosts if h[1] != port], self.node_hosts[-1], order_on_write=self.order_on_write) for port in self.ports[:-1]]
+        self.leader = Leader(self.node_hosts[-1], self.node_hosts[:-1], self.node_hosts[-1], order_on_write=self.order_on_write)
         self.threads = [Thread(target=node.run) for node in [self.leader, *self.followers]]
 
         for thread in self.threads:
@@ -56,8 +56,6 @@ class DasSystem(System):
 
         super().__init__('DAS', len(self.hostnames) - 1, num_clients, port, order_on_write)
         self.node_hosts = [(h, port) for h in self.hostnames]
-
-
     
     def _startup_nodes(self):
         host = (self.hostname, self.port)
@@ -69,10 +67,10 @@ class DasSystem(System):
 
         host = (self.hostname, self.ports[0])
         if is_leader:
-            leader = Leader(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], host)
+            leader = Leader(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], host, order_on_write=self.order_on_write)
             leader.run() 
         elif not is_client:
-            follower = Follower(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], (self.hostnames[-1], self.port))
+            follower = Follower(host, [(h, self.port) for h in self.hostnames[1:] if h != self.hostname], (self.hostnames[-1], self.port), order_on_write=self.order_on_write)
             follower.run()
 
     def shutdown(self):

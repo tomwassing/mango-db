@@ -54,7 +54,6 @@ def main(order_on_write, read_heavy):
     end = time.perf_counter()
     print('Time: ', end-start)
 
-
 if __name__ == '__main__':
     order_on_write = len(sys.argv) > 1 and int(sys.argv[1]) == 1
     read_heavy = len(sys.argv) > 2 and int(sys.argv[2]) == 1
