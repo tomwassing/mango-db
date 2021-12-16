@@ -24,11 +24,13 @@ class Client:
 
         logging.info("Client: constructed with hosts: {}".format(node_hosts))
 
-    # Sync operation
+    # Sends 'data' to specific host and awaits the response
     def send_recv(self, data, host=None):
+        # If no host is specified a random one is chosen
         if not host:
             host = random.choice(self.node_hosts)
 
+        # Send data and await response
         self.socket.sendto(json.dumps(data).encode(), host)
         logging.info("Client: send message to node:{} : {}".format(host, data))
         data, addr = self.socket.recvfrom(1024)
