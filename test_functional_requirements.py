@@ -1,3 +1,14 @@
+'''
+Test the functional requirements of MangoDB. These include:
+   - Tests of basic functionalities (read, write)
+   - Durability tests (FE1, FE2, FE3)
+   - Consistency tests (FE4, FE5)
+Tests in pytest are executed ten times to account for randomness.
+The randomness is derived from the fact that we chose random follower nodes.
+
+Please run with `pytest -v`
+'''
+
 import threading
 import random
 import pytest
@@ -7,6 +18,9 @@ from client import Client
 
 
 def setup(num_nodes, num_clients, start_port=25000, delayed=False):
+    '''
+    Create the nodes, clients and threads necessary to run MangoDB.
+    '''
     node_ports = list(range(start_port, start_port + num_nodes))
     node_hosts = [("127.0.0.1", port) for port in node_ports]
     nodes = [Follower(("127.0.0.1", port), [h for h in node_hosts if h[1] != port], node_hosts[-1]) for port in node_ports[:-1]]
@@ -29,7 +43,14 @@ def setup(num_nodes, num_clients, start_port=25000, delayed=False):
     return node_hosts, nodes, leader, clients, threads
 
 class TestSimpleTest:
+    '''
+    Class that contains the simple tests that test the basic functionalities of MangoDB.
+    (multiple write/read tests)
+    '''
     def setup_method(self, method):
+        '''
+        Create 3 follower nodes, a leader and 5 clients.
+        '''
         _, nodes, leader, clients, threads = setup(3, 5)
         self.nodes = nodes
         self.leader = leader
@@ -37,6 +58,9 @@ class TestSimpleTest:
         self.threads = threads
 
     def teardown_method(self):
+        '''
+        Safely close all connected clients and running threads.
+        '''
         for client in self.clients:
             client.exit()
         for thread in self.threads:
@@ -44,12 +68,33 @@ class TestSimpleTest:
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write(self, execution_number):
+        '''
+        Write values to multiple keys and attempt to retrieve a value.
+        '''
         client = self.clients[0]
         client.write(["World!", "keyTest"], ['Hello?', "valueTest"])
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
 
         assert read_value == 'Hello?' and order_index == 0
+
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_read_after_write_2(self, execution_number):
+        client = self.clients[0]
+        client.write(["World!", "keyTest"], ['Hello?', "valueTest"])
+        read_value = client.read('keyTest')["value"]
+        order_index = client.read('keyTest')["order_index"]
+        print(read_value, order_index)
+        assert read_value == "valueTest" and order_index == 0
+
+    @pytest.mark.parametrize('execution_number', range(10))
+    def test_read_after_write_same_key(self, execution_number):
+        client = self.clients[0]
+        client.write(["World!", "World!"], ['Hello?', "Hello?1"])
+        read_value = client.read('World!')["value"]
+        order_index = client.read('World!')["order_index"]
+        print(read_value, order_index)
+        assert read_value == "Hello?1" and order_index == 1
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_five_writes(self, execution_number):
