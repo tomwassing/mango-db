@@ -89,7 +89,7 @@ class TestSimpleTest:
         read_value = client.read('keyTest')["value"]
         order_index = client.read('keyTest')["order_index"]
         print(read_value, order_index)
-        assert read_value == "valueTest" and order_index == 1
+        assert read_value == "valueTest" and order_index == 0
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_five_writes(self, execution_number):
