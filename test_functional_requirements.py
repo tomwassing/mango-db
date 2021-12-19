@@ -76,7 +76,7 @@ class TestSimpleTest:
         read_value = client.read('World!')["value"]
         order_index = client.read('World!')["order_index"]
 
-        assert read_value == 'Hello?' and order_index == 0
+        assert read_value == 'Hello?' and order_index == 1
 
     @pytest.mark.parametrize('execution_number', range(10))
     def test_read_after_write_2(self, execution_number):
