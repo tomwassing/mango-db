@@ -165,3 +165,6 @@ Temporary Items
 .apdisk
 
 *.csv
+
+/results/*.png
+.idea

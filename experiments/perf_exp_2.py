@@ -39,9 +39,6 @@ def read_heave_exp_func(experiment):
             operation = 'write'
             remaining_writes -= 1
 
-        # if latency is None or operation is None or on_leader is None:
-        #     raise Exception('invalid result')
-
         yield latency, operation, on_leader
 
 
@@ -77,9 +74,6 @@ def write_heavy_exp_func(experiment):
             latency, on_leader = experiment.client_write(client_idx=0)
             operation = 'write'
             remaining_writes -= 1
-
-        # if latency is None or operation is None or on_leader is None:
-        #     raise Exception('invalid result')
 
         yield latency, operation, on_leader
 
