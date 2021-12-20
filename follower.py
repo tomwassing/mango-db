@@ -63,8 +63,9 @@ class Follower(Node):
                     return True
 
         for value in self.write_buffer.values():
-            if value[0][0] == key:
-                return True
+            for k in value[0]:
+                if k == key:
+                    return True
 
         return False
 
