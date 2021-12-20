@@ -51,5 +51,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-* Thanks to Sacheendra Tallui for the creation and the supervision of this project.
+* Thanks to Sacheendra Talluri for the creation and the supervision of this project.
 * Thanks to Alexandra Iosup for providing us with the source matterial necessary to complete the lab assignment.
