@@ -167,3 +167,4 @@ Temporary Items
 *.csv
 
 /results/*.png
+.idea
