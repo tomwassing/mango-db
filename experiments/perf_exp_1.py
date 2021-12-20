@@ -40,9 +40,6 @@ def experiment_func(experiment, client_idx=0):
             operation = 'write'
             remaining_writes -= 1
 
-        # if latency is None or operation is None or on_leader is None:
-        #     raise Exception('invalid result')
-
         yield latency, operation, on_leader
 
 
@@ -50,12 +47,6 @@ if __name__ == '__main__':
     import pandas as pd
 
     systems = [
-        # System(name='ordering_after_write_2_nodes_1_client', num_nodes=2, num_clients=1, port=27000),
-        # System(name='ordering_before_write_2_nodes_1_client', num_nodes=2, num_clients=1, port=28000, order_on_write=True),
-        # System(name='ordering_after_write_4_nodes_1_client', num_nodes=4, num_clients=1, port=29000),
-        # System(name='ordering_before_write_4_nodes_1_client', num_nodes=4, num_clients=1, port=30000, order_on_write=True),
-        # System(name='ordering_after_write_8_nodes_1_client', num_nodes=8, num_clients=1, port=31000),
-        # System(name='ordering_before_write_8_nodes_1_client', num_nodes=8, num_clients=1, port=32000, order_on_write=True),
         System(name='ordering_after_write_16_nodes_1_client', num_nodes=16, num_clients=1, port=33000),
         System(name='ordering_before_write_16_nodes_1_client', num_nodes=16, num_clients=1, port=34000, order_on_write=True),
     ]
